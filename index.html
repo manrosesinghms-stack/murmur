@@ -6,26 +6,29 @@
 <title>MURMUR — guide the living swarm</title>
 <meta name="description" content="Guide a living swarm of light. Absorb the lights to grow, and keep your swarm alive as the dark hunts it.">
 <meta name="theme-color" content="#05070f">
+<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
 <style>
-  html,body{margin:0;height:100%;overflow:hidden;background:#05070f;cursor:none;touch-action:none}
+  html,body{margin:0;height:100%;overflow:hidden;background:#04050d;cursor:none;touch-action:none}
   #c{display:block}
   #ui{position:fixed;inset:0;pointer-events:none;font-family:'Segoe UI',Arial,sans-serif;color:#dbeafe}
-  #title{position:absolute;left:0;right:0;top:30%;text-align:center;transition:opacity 1s}
-  #title h1{margin:0;font-size:15vmin;font-weight:200;letter-spacing:1.2vmin;
+  #title{position:absolute;left:0;right:0;top:28%;text-align:center;transition:opacity 1s}
+  #title h1{margin:0;font-size:16vmin;font-weight:100;letter-spacing:1.6vmin;
     background:linear-gradient(90deg,#67e8f9,#a5b4fc,#f0abfc,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 0 24px rgba(103,232,249,.35))}
-  #title p{margin:1vmin 0 0;font-size:2.6vmin;font-weight:300;letter-spacing:.5vmin;color:#93a3c0}
-  #title .go{margin-top:3vmin;font-size:3vmin;font-weight:400;color:#e0f2fe;opacity:.9;animation:pulse 1.6s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-  #hud{position:absolute;top:16px;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s}
-  #hud .sc{font-size:5vmin;font-weight:300;letter-spacing:.4vmin;font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(103,232,249,.5)}
-  #hud .sz{font-size:2vmin;color:#7b8bb0;font-weight:300;letter-spacing:.3vmin}
-  #over{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(5,7,15,.55)}
-  #over h2{margin:0;font-size:9vmin;font-weight:200;letter-spacing:1vmin;color:#e0e7ff}
-  #over .r{font-size:3vmin;color:#93a3c0;font-weight:300;margin-top:1vmin}
-  #over .b{font-size:2.4vmin;color:#fde68a;margin-top:1.5vmin;font-weight:300}
-  #over .again{margin-top:4vmin;font-size:3vmin;color:#e0f2fe;font-weight:400;animation:pulse 1.6s ease-in-out infinite}
-  #stat{position:absolute;bottom:8px;left:10px;font-size:11px;color:#26334d;font-variant-numeric:tabular-nums}
+    filter:drop-shadow(0 0 34px rgba(129,140,248,.5))}
+  #title p{margin:0.4vmin 0 0;font-size:2.5vmin;font-weight:300;letter-spacing:.7vmin;color:#8ea2c9}
+  #title .go{margin-top:3.4vmin;font-size:2.7vmin;font-weight:300;letter-spacing:.3vmin;color:#e0f2fe;opacity:.9;animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  #hud{position:absolute;top:18px;left:0;right:0;text-align:center;opacity:0;transition:opacity .6s}
+  #hud .sc{font-size:5vmin;font-weight:200;letter-spacing:.5vmin;font-variant-numeric:tabular-nums;text-shadow:0 0 24px rgba(129,140,248,.6)}
+  #hud .sz{font-size:1.9vmin;color:#7183a8;font-weight:300;letter-spacing:.4vmin}
+  #over{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 45%,rgba(10,14,30,.35),rgba(4,5,13,.78))}
+  #over h2{margin:0;font-size:9vmin;font-weight:100;letter-spacing:1.4vmin;color:#e6e9ff}
+  #over .r{font-size:2.9vmin;color:#8ea2c9;font-weight:300;margin-top:1.4vmin}
+  #over .b{font-size:2.3vmin;color:#fde68a;margin-top:1.4vmin;font-weight:300;letter-spacing:.2vmin}
+  #over .again{margin-top:4vmin;font-size:2.8vmin;color:#e0f2fe;font-weight:300;animation:pulse 1.8s ease-in-out infinite}
+  #sound{position:absolute;bottom:16px;left:16px;pointer-events:auto;cursor:pointer;font-size:20px;opacity:.5;transition:opacity .2s}
+  #sound:hover{opacity:1}
+  #best0{position:absolute;left:0;right:0;top:64%;text-align:center;font-size:2vmin;color:#5f7095;font-weight:300;letter-spacing:.3vmin}
   .fade{opacity:0!important} .show{opacity:1!important} .flex{display:flex!important}
 </style>
 </head>
@@ -33,36 +36,88 @@
 <canvas id="c"></canvas>
 <div id="ui">
   <div id="title"><h1>MURMUR</h1><p>a living swarm of light</p><div class="go">move to begin</div></div>
+  <div id="best0"></div>
   <div id="hud"><div class="sc">0</div><div class="sz">swarm · 0</div></div>
   <div id="over"><h2>CONSUMED</h2><div class="r"></div><div class="b"></div><div class="again">move to begin again</div></div>
-  <div id="stat"></div>
+  <div id="sound">🔊</div>
 </div>
 <script>
 'use strict';
-/* ================= MURMUR — Phase 2: the game =================
+/* ================= MURMUR — premium build =================
    Flocking swarm you guide. Absorb lights to grow; the dark hunts
-   and eats your motes. Grow big, stay alive, chase the score.
-=============================================================== */
-const cv=document.getElementById('c'), ctx=cv.getContext('2d',{alpha:false});
-let DPR=Math.min(devicePixelRatio||1,1.5), VW=0,VH=0;
-function resize(){VW=innerWidth;VH=innerHeight;cv.width=VW*DPR;cv.height=VH*DPR;cv.style.width=VW+'px';cv.style.height=VH+'px';ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#05070f';ctx.fillRect(0,0,VW,VH);}
-addEventListener('resize',resize);resize();
+   and nibbles stragglers. Premium render (nebula bg, parallax stars,
+   bloom, void predators, radiant lights) + generative audio + SDK.
+=========================================================== */
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 
-/* ---------- glow sprites ---------- */
-const PALETTE=['#67e8f9','#38bdf8','#818cf8','#a78bfa','#e879f9','#f0abfc','#fde68a','#5eead4'];
-const SPRITE=64;
-function makeGlow(inner,mid){const s=document.createElement('canvas');s.width=SPRITE;s.height=SPRITE;const g=s.getContext('2d');const grd=g.createRadialGradient(SPRITE/2,SPRITE/2,0,SPRITE/2,SPRITE/2,SPRITE/2);grd.addColorStop(0,inner);grd.addColorStop(0.22,mid);grd.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=grd;g.beginPath();g.arc(SPRITE/2,SPRITE/2,SPRITE/2,0,7);g.fill();return s;}
-const glowSprites=PALETTE.map(c=>makeGlow('rgba(255,255,255,0.95)',c));
-const lightSprite=makeGlow('rgba(255,255,255,1)','#fde68a');
-const darkSprite=(()=>{const s=document.createElement('canvas');s.width=SPRITE;s.height=SPRITE;const g=s.getContext('2d');const grd=g.createRadialGradient(SPRITE/2,SPRITE/2,0,SPRITE/2,SPRITE/2,SPRITE/2);grd.addColorStop(0,'rgba(0,0,0,0)');grd.addColorStop(0.5,'rgba(80,10,40,0.0)');grd.addColorStop(0.72,'rgba(244,63,94,0.6)');grd.addColorStop(0.85,'rgba(120,20,60,0.35)');grd.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=grd;g.beginPath();g.arc(SPRITE/2,SPRITE/2,SPRITE/2,0,7);g.fill();return s;})();
+/* ---------- canvases (visible + trail + bloom + bg) ---------- */
+const cv=document.getElementById('c'), ctx=cv.getContext('2d',{alpha:false});
+const trailCv=document.createElement('canvas'), tctx=trailCv.getContext('2d');
+const bloomCv=document.createElement('canvas'), bctx=bloomCv.getContext('2d');
+const bgCv=document.createElement('canvas'), bgctx=bgCv.getContext('2d');
+let DPR=Math.min(devicePixelRatio||1,1.5), VW=0,VH=0, BW=0,BH=0;
+function resize(){
+  VW=innerWidth; VH=innerHeight;
+  for(const c of [cv,trailCv]){c.width=VW*DPR;c.height=VH*DPR;}
+  cv.style.width=VW+'px'; cv.style.height=VH+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  tctx.setTransform(DPR,0,0,DPR,0,0);
+  tctx.fillStyle='#04050d'; tctx.fillRect(0,0,VW,VH);
+  BW=Math.max(2,(VW*DPR*0.5)|0); BH=Math.max(2,(VH*DPR*0.5)|0);
+  bloomCv.width=BW; bloomCv.height=BH;
+  bgCv.width=VW*DPR; bgCv.height=VH*DPR; bgctx.setTransform(DPR,0,0,DPR,0,0);
+  paintBackground(); initStars();
+}
+addEventListener('resize',resize);
+
+/* ---------- background: nebula + vignette (baked) ---------- */
+function paintBackground(){
+  const g=bgctx;
+  g.setTransform(DPR,0,0,DPR,0,0);
+  g.fillStyle='#04050d'; g.fillRect(0,0,VW,VH);
+  // soft nebula blobs
+  const blobs=[['#1b2a5e',0.5,0.32],['#123a44',0.72,0.62],['#2a1a4d',0.32,0.7],['#0e2540',0.85,0.28]];
+  g.globalCompositeOperation='lighter';
+  for(const [col,fx,fy] of blobs){
+    const cx=VW*fx, cy=VH*fy, r=Math.max(VW,VH)*rnd(0.35,0.6);
+    const grd=g.createRadialGradient(cx,cy,0,cx,cy,r);
+    grd.addColorStop(0,col); grd.addColorStop(1,'rgba(0,0,0,0)');
+    g.globalAlpha=0.5; g.fillStyle=grd; g.fillRect(0,0,VW,VH);
+  }
+  g.globalAlpha=1; g.globalCompositeOperation='source-over';
+  // vignette
+  const vg=g.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*0.3,VW/2,VH/2,Math.max(VW,VH)*0.75);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(2,3,9,0.85)');
+  g.fillStyle=vg; g.fillRect(0,0,VW,VH);
+}
+
+/* ---------- parallax stars ---------- */
+let stars=[];
+function initStars(){
+  stars=[]; const n=Math.round(VW*VH/9000);
+  for(let i=0;i<n;i++)stars.push({x:Math.random()*VW,y:Math.random()*VH,z:rnd(0.2,1),tw:Math.random()*7,s:rnd(0.6,1.8)});
+}
+
+/* ---------- sprites ---------- */
+const SP=64;
+function radial(stops){const s=document.createElement('canvas');s.width=SP;s.height=SP;const g=s.getContext('2d');const grd=g.createRadialGradient(SP/2,SP/2,0,SP/2,SP/2,SP/2);for(const [o,c] of stops)grd.addColorStop(o,c);g.fillStyle=grd;g.beginPath();g.arc(SP/2,SP/2,SP/2,0,7);g.fill();return s;}
+const PAL=['#7dd3fc','#38bdf8','#818cf8','#a78bfa','#e879f9','#f0abfc','#fde68a','#5eead4'];
+const glow=PAL.map(c=>radial([[0,'rgba(255,255,255,0.95)'],[0.22,c],[1,'rgba(0,0,0,0)']]));
+const starSprite=radial([[0,'rgba(255,255,255,0.9)'],[0.4,'rgba(200,220,255,0.5)'],[1,'rgba(0,0,0,0)']]);
+// radiant light (food): core + halo + star flare
+const lightCore=radial([[0,'rgba(255,255,255,1)'],[0.25,'#fff4c2'],[0.6,'rgba(253,230,138,0.5)'],[1,'rgba(0,0,0,0)']]);
+const flare=(()=>{const s=document.createElement('canvas');s.width=SP;s.height=SP;const g=s.getContext('2d');g.translate(SP/2,SP/2);const grd=g.createLinearGradient(-SP/2,0,SP/2,0);grd.addColorStop(0,'rgba(0,0,0,0)');grd.addColorStop(0.5,'rgba(255,244,194,0.9)');grd.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=grd;for(let k=0;k<2;k++){g.fillRect(-SP/2,-1,SP,2);g.rotate(Math.PI/2);}return s;})();
+// void predator: dark core (occluding) + violent corona
+const voidCore=radial([[0,'rgba(4,3,10,1)'],[0.55,'rgba(6,4,14,0.95)'],[0.75,'rgba(20,4,20,0.5)'],[1,'rgba(0,0,0,0)']]);
+const voidRing=radial([[0,'rgba(0,0,0,0)'],[0.62,'rgba(0,0,0,0)'],[0.74,'rgba(244,63,94,0.75)'],[0.83,'rgba(217,70,239,0.5)'],[1,'rgba(0,0,0,0)']]);
 
 /* ---------- swarm (capacity arrays) ---------- */
-const CAP=2000;
+const CAP=2200;
 const px=new Float32Array(CAP),py=new Float32Array(CAP),vx=new Float32Array(CAP),vy=new Float32Array(CAP),hue=new Uint8Array(CAP),dead=new Uint8Array(CAP);
 let N=0;
-function addMote(x,y){if(N>=CAP)return;px[N]=x+rnd(-6,6);py[N]=y+rnd(-6,6);const a=Math.random()*7;vx[N]=Math.cos(a)*1.5;vy[N]=Math.sin(a)*1.5;hue[N]=(Math.random()*PALETTE.length)|0;N++;}
+function addMote(x,y){if(N>=CAP)return;px[N]=x+rnd(-6,6);py[N]=y+rnd(-6,6);const a=Math.random()*7;vx[N]=Math.cos(a)*1.5;vy[N]=Math.sin(a)*1.5;hue[N]=(Math.random()*PAL.length)|0;N++;}
 function seedSwarm(n){N=0;for(let i=0;i<n;i++){const a=Math.random()*7,r=Math.random()*140;addMote(VW/2+Math.cos(a)*r,VH/2+Math.sin(a)*r);}}
-const rnd=(a,b)=>a+Math.random()*(b-a);
 
 /* ---------- spatial grid ---------- */
 const NEI=30,CELL=NEI;let cols,rows,cellHead,cellNext=new Int32Array(CAP);
@@ -70,7 +125,7 @@ function buildGrid(){cols=Math.max(1,Math.ceil(VW/CELL));rows=Math.max(1,Math.ce
 function nearMotes(x,y,r,cb){let cx=(x/CELL)|0,cy=(y/CELL)|0;cx=cx<0?0:cx>=cols?cols-1:cx;cy=cy<0?0:cy>=rows?rows-1:cy;const cr=Math.ceil(r/CELL),r2=r*r;for(let gy=cy-cr;gy<=cy+cr;gy++){if(gy<0||gy>=rows)continue;for(let gx=cx-cr;gx<=cx+cr;gx++){if(gx<0||gx>=cols)continue;let j=cellHead[gy*cols+gx];while(j!==-1){const dx=px[j]-x,dy=py[j]-y;if(dx*dx+dy*dy<r2)cb(j);j=cellNext[j];}}}}
 
 /* ---------- pointer ---------- */
-const P={x:VW/2,y:VH/2,active:false,down:false};
+const P={x:0,y:0,active:false,down:false};
 function setP(e){const t=e.touches?e.touches[0]:e;if(!t)return;P.x=t.clientX;P.y=t.clientY;P.active=true;onInteract();}
 cv.addEventListener('mousemove',setP);
 cv.addEventListener('mousedown',e=>{P.down=true;setP(e);});
@@ -78,31 +133,34 @@ addEventListener('mouseup',()=>P.down=false);
 cv.addEventListener('touchstart',e=>{P.down=true;setP(e);e.preventDefault();},{passive:false});
 cv.addEventListener('touchmove',e=>{setP(e);e.preventDefault();},{passive:false});
 addEventListener('touchend',()=>P.down=false);
-function onInteract(){ if(S.mode==='title'||S.mode==='over') startPlay(); }
+function onInteract(){ audioStart(); if(S.mode==='title'||S.mode==='over') startPlay(); }
 
-/* ---------- lights (food) & predators (dark) ---------- */
+/* ---------- lights + predators ---------- */
 let lights=[], preds=[];
 function spawnLight(){const m=90;lights.push({x:rnd(m,VW-m),y:rnd(m,VH-m),charge:0,ph:Math.random()*7});}
-function spawnPred(){const edge=Math.floor(Math.random()*4);let x,y;if(edge<2){x=edge?VW+40:-40;y=rnd(0,VH);}else{x=rnd(0,VW);y=edge===2?-40:VH+40;}preds.push({x,y,vx:0,vy:0,r:26,ph:Math.random()*7});}
+function spawnPred(){const e=Math.floor(Math.random()*4);let x,y;if(e<2){x=e?VW+40:-40;y=rnd(0,VH);}else{x=rnd(0,VW);y=e===2?-40:VH+40;}preds.push({x,y,vx:0,vy:0,r:26,ph:Math.random()*7,rot:Math.random()*7});}
 
 /* ---------- state ---------- */
-const S={mode:'title',t:0,score:0,dispScore:0,best:+(localStorage.getItem('mur_best')||0),maxSize:0,shake:0,birth:0};
+const S={mode:'title',t:0,score:0,dispScore:0,best:+(localStorage.getItem('mur_best')||0),maxSize:0,shake:0,milestone:0,energy:0};
 function startPlay(){
-  S.mode='play';S.t=0;S.score=0;S.dispScore=0;S.maxSize=0;
+  S.mode='play';S.t=0;S.score=0;S.dispScore=0;S.maxSize=0;S.milestone=0;
   seedSwarm(220);
   lights=[];for(let i=0;i<7;i++)spawnLight();
   preds=[];spawnPred();
   document.getElementById('title').classList.add('fade');
+  document.getElementById('best0').classList.add('fade');
   document.getElementById('over').classList.remove('flex');
   document.getElementById('hud').classList.add('show');
+  sdkStart();
 }
 function gameOver(){
   S.mode='over';
-  if(S.score>S.best){S.best=Math.round(S.score);localStorage.setItem('mur_best',S.best);}
+  if(S.score>S.best){S.best=Math.round(S.score);localStorage.setItem('mur_best',S.best);sdkHappy();}
   const o=document.getElementById('over');o.classList.add('flex');
   o.querySelector('.r').textContent='swarm peaked at '+S.maxSize+' motes · '+Math.round(S.score)+' points';
   o.querySelector('.b').textContent=(Math.round(S.score)>=S.best?'★ new best ':'best ')+S.best;
   document.getElementById('hud').classList.remove('show');
+  sDeath(); sdkStop();
 }
 
 /* ---------- flocking ---------- */
@@ -122,7 +180,6 @@ function stepFlock(){
     fx+=Math.cos(S.t*0.6+i)*WANDER;fy+=Math.sin(S.t*0.78+i*1.3)*WANDER;
     if(x<40)fx+=(40-x)*0.02;else if(x>VW-40)fx-=(x-(VW-40))*0.02;
     if(y<40)fy+=(40-y)*0.02;else if(y>VH-40)fy-=(y-(VH-40))*0.02;
-    // flee predators — the swarm parts and flows around the dark
     for(let pi=0;pi<preds.length;pi++){const D=preds[pi];const ex=x-D.x,ey=y-D.y,e2=ex*ex+ey*ey;if(e2<9025&&e2>1){const inv=1/Math.sqrt(e2);const w=(1-Math.sqrt(e2)/95)*1.3;fx+=ex*inv*w;fy+=ey*inv*w;}}
     const fl=Math.hypot(fx,fy);if(fl>MAXF){fx=fx/fl*MAXF;fy=fy/fl*MAXF;}
     let nvx=ix+fx,nvy=iy+fy,sp=Math.hypot(nvx,nvy);
@@ -130,81 +187,150 @@ function stepFlock(){
     vx[i]=nvx;vy[i]=nvy;px[i]=x+nvx;py[i]=y+nvy;
   }
 }
-
-/* ---------- swarm centroid ---------- */
 let cenx=0,ceny=0;
 function centroid(){let sx=0,sy=0;for(let i=0;i<N;i++){sx+=px[i];sy+=py[i];}cenx=N?sx/N:VW/2;ceny=N?sy/N:VH/2;}
 
-/* ---------- lights + predators ---------- */
 function stepPlay(dt){
-  // difficulty ramps with time + score (gentle early, so you can grow first)
   const wantPreds=1+Math.floor(S.t/20)+Math.floor(S.score/900);
   while(preds.length<Math.min(8,wantPreds))spawnPred();
-  // lights: absorb when swarm dwells on them
   for(const L of lights){
     let near=0; nearMotes(L.x,L.y,28,()=>{near++;});
     L.charge=Math.min(1,L.charge + near*dt*0.03);
     if(L.charge>=1){
-      const gain=24; for(let k=0;k<gain;k++)addMote(L.x,L.y);
+      for(let k=0;k<24;k++)addMote(L.x,L.y);
       S.score+=60; S.shake=Math.min(1,S.shake+0.35);
-      burst(L.x,L.y,26,true);
+      burst(L.x,L.y,26); sAbsorb();
       L.x=rnd(90,VW-90);L.y=rnd(90,VH-90);L.charge=0;
     }
   }
-  // predators: home toward swarm centroid, NIBBLE motes on contact (capped per frame)
   let anyDead=false;
   for(const D of preds){
-    const dx=cenx-D.x,dy=ceny-D.y,d=Math.hypot(dx,dy)||1;
-    const spd=(0.55+S.t*0.0035);
-    D.vx=D.vx*0.94+(dx/d)*spd*0.14; D.vy=D.vy*0.94+(dy/d)*spd*0.14;
-    D.x+=D.vx; D.y+=D.vy;
+    const dx=cenx-D.x,dy=ceny-D.y,d=Math.hypot(dx,dy)||1,spd=(0.55+S.t*0.0035);
+    D.vx=D.vx*0.94+(dx/d)*spd*0.14; D.vy=D.vy*0.94+(dy/d)*spd*0.14; D.x+=D.vx; D.y+=D.vy; D.rot+=0.01;
     let bites=0; nearMotes(D.x,D.y,16,(j)=>{if(bites<2&&!dead[j]){dead[j]=1;anyDead=true;bites++;}});
   }
   if(anyDead){
-    // compact out dead motes + dark puff
-    let w=0;
-    for(let i=0;i<N;i++){if(dead[i]){dead[i]=0;if(Math.random()<0.5)darkPuff(px[i],py[i]);continue;}if(w!==i){px[w]=px[i];py[w]=py[i];vx[w]=vx[i];vy[w]=vy[i];hue[w]=hue[i];}w++;}
-    N=w; S.shake=Math.min(1,S.shake+0.25);
+    let w=0,killed=0;
+    for(let i=0;i<N;i++){if(dead[i]){dead[i]=0;killed++;if(Math.random()<0.5)darkPuff(px[i],py[i]);continue;}if(w!==i){px[w]=px[i];py[w]=py[i];vx[w]=vx[i];vy[w]=vy[i];hue[w]=hue[i];}w++;}
+    N=w; S.shake=Math.min(1,S.shake+0.22); if(killed>0)sBite();
   }
   if(N>S.maxSize)S.maxSize=N;
-  S.score+=dt*4*Math.min(4,N/300);   // survival + size drip
-  if(N<50){gameOver();}
+  S.score+=dt*4*Math.min(4,N/300);
+  // milestone chord at 500 / 1000 / 1600 motes
+  const ms=N>=1600?3:N>=1000?2:N>=500?1:0;
+  if(ms>S.milestone){S.milestone=ms;sMilestone();sdkHappy();}
+  if(N<50)gameOver();
 }
 
 /* ---------- particles ---------- */
-const fx=[];
-function burst(x,y,n,warm){for(let i=0;i<n;i++){const a=Math.random()*7,s=rnd(2,7);fx.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t:0,life:rnd(.4,.9),warm});}}
-function darkPuff(x,y){fx.push({x,y,vx:rnd(-1,1),vy:rnd(-1,1),t:0,life:.5,dark:true});}
-function stepFx(dt){for(let i=fx.length-1;i>=0;i--){const p=fx[i];p.t+=dt;p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;if(p.t>=p.life)fx.splice(i,1);}}
+const fxp=[];
+function burst(x,y,n){for(let i=0;i<n;i++){const a=Math.random()*7,s=rnd(2,7);fxp.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t:0,life:rnd(.4,.9)});}}
+function darkPuff(x,y){fxp.push({x,y,vx:rnd(-1,1),vy:rnd(-1,1),t:0,life:.5,dark:true});}
+function stepFx(dt){for(let i=fxp.length-1;i>=0;i--){const p=fxp[i];p.t+=dt;p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;if(p.t>=p.life)fxp.splice(i,1);}}
 
-/* ---------- render ---------- */
-function render(){
-  ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(5,7,15,0.15)';ctx.fillRect(0,0,VW,VH);
-  ctx.globalCompositeOperation='lighter';
-  // lights
-  for(const L of lights){const pu=0.8+Math.sin(S.t*3+L.ph)*0.2,sz=18+L.charge*16;ctx.globalAlpha=0.5*pu+L.charge*0.4;ctx.drawImage(lightSprite,L.x-sz/2,L.y-sz/2,sz,sz);}
-  // motes
-  for(let i=0;i<N;i++){const sp=Math.hypot(vx[i],vy[i]),h=(hue[i]+((sp*1.5)|0))%PALETTE.length,size=6+sp*2.2;ctx.globalAlpha=0.55;ctx.drawImage(glowSprites[h],px[i]-size/2,py[i]-size/2,size,size);}
-  // particles
-  for(const p of fx){const k=1-p.t/p.life;ctx.globalAlpha=k*(p.dark?0.5:0.7);const sp=p.dark?darkSprite:lightSprite;const sz=p.dark?22:10;ctx.drawImage(sp,p.x-sz/2,p.y-sz/2,sz,sz);}
-  // predators (drawn last, over the glow)
-  for(const D of preds){const pu=0.85+Math.sin(S.t*4+D.ph)*0.15,sz=D.r*3.2*pu;ctx.globalAlpha=0.9;ctx.drawImage(darkSprite,D.x-sz/2,D.y-sz/2,sz,sz);}
-  // pointer
-  if(P.active&&S.mode!=='over'){ctx.globalAlpha=P.down?0.5:0.2;const ps=P.down?90:56;ctx.drawImage(glowSprites[0],P.x-ps/2,P.y-ps/2,ps,ps);}
-  ctx.globalAlpha=1;
+/* ================= AUDIO (generative + SFX) ================= */
+let AC=null, MUTE=+(localStorage.getItem('mur_mute')||0), master=null, musGain=null;
+function audioStart(){
+  if(AC)return;
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain(); master.gain.value=MUTE?0:1; master.connect(AC.destination);
+    musGain=AC.createGain(); musGain.gain.value=0.0; musGain.connect(master);
+    // ambient pad: detuned oscillators through a slow lowpass
+    const notes=[55,82.41,110,164.81]; // A1 E2 A2 E3
+    const filt=AC.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=520; filt.Q.value=6; filt.connect(musGain);
+    notes.forEach((f,i)=>{const o=AC.createOscillator();o.type=i<2?'sine':'triangle';o.frequency.value=f;const d=AC.createOscillator();d.frequency.value=0.05+i*0.03;const dg=AC.createGain();dg.gain.value=1.5;d.connect(dg);dg.connect(o.detune);const g=AC.createGain();g.gain.value=0.16/(i+1);o.connect(g);g.connect(filt);o.start();d.start();});
+    // slow filter LFO for movement
+    const lfo=AC.createOscillator();lfo.frequency.value=0.05;const lg=AC.createGain();lg.gain.value=240;lfo.connect(lg);lg.connect(filt.frequency);lfo.start();
+    musGain.gain.linearRampToValueAtTime(0.9, AC.currentTime+3);
+  }catch(e){AC=null;}
 }
+function blip(freq,dur,type,vol,slide){if(!AC||MUTE)return;try{const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=freq;if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,slide),AC.currentTime+dur);g.gain.value=vol||.15;g.gain.exponentialRampToValueAtTime(.0008,AC.currentTime+dur);o.connect(g);g.connect(master);o.start();o.stop(AC.currentTime+dur+0.02);}catch(e){}}
+function noiseHit(dur,vol,f0){if(!AC||MUTE)return;try{const len=Math.max(1,dur*AC.sampleRate|0),b=AC.createBuffer(1,len,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);const s=AC.createBufferSource();s.buffer=b;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f0||300;const g=AC.createGain();g.gain.value=vol||.3;s.connect(bp);bp.connect(g);g.connect(master);s.start();}catch(e){}}
+let lastAbs=0;
+function sAbsorb(){const n=AC?AC.currentTime:0;const step=[0,3,7,10,12][Math.min(4,Math.floor((N-200)/220))]||0;blip(660*Math.pow(2,step/12),.5,'triangle',.14,990*Math.pow(2,step/12));setTimeout(()=>blip(990,.35,'sine',.08),60);}
+function sBite(){noiseHit(.14,.16,180);blip(90,.16,'sawtooth',.1,50);}
+function sDeath(){blip(200,.9,'sawtooth',.18,50);noiseHit(.8,.18,140);}
+function sMilestone(){[0,4,7,12].forEach((s,i)=>setTimeout(()=>blip(523*Math.pow(2,s/12),.6,'triangle',.13),i*70));}
+document.getElementById('sound').onclick=()=>{MUTE=MUTE?0:1;localStorage.setItem('mur_mute',MUTE);document.getElementById('sound').textContent=MUTE?'🔇':'🔊';if(master)master.gain.value=MUTE?0:1;};
+
+/* ================= CrazyGames SDK ================= */
+let SDKOK=false;
+addEventListener('load',async()=>{try{if(window.CrazyGames&&CrazyGames.SDK){await CrazyGames.SDK.init();SDKOK=true;}}catch(e){}});
+let lastGp=0,lastHappy=0;
+function sdkStart(){const n=Date.now();if(n-lastGp<1500)return;lastGp=n;try{SDKOK&&CrazyGames.SDK.game.gameplayStart();}catch(e){}}
+function sdkStop(){const n=Date.now();if(n-lastGp<1500)return;lastGp=n;try{SDKOK&&CrazyGames.SDK.game.gameplayStop();}catch(e){}}
+function sdkHappy(){const n=Date.now();if(n-lastHappy<15000)return;lastHappy=n;try{SDKOK&&CrazyGames.SDK.game.happytime();}catch(e){}}
+
+/* ================= RENDER ================= */
+let starT=0;
+function render(dt){
+  S.energy=lerp(S.energy, clamp((N-250)/1300,0,1), 0.05);
+  // 1) trail layer: fade + additive motes
+  tctx.globalCompositeOperation='source-over';
+  tctx.fillStyle='rgba(4,5,13,0.15)'; tctx.fillRect(0,0,VW,VH);
+  tctx.globalCompositeOperation='lighter';
+  const mBoost=1+S.energy*0.4;
+  for(let i=0;i<N;i++){const sp=Math.hypot(vx[i],vy[i]);const h=(hue[i]+((sp*1.5)|0))%PAL.length;const size=(6+sp*2.2)*mBoost;tctx.globalAlpha=0.55;tctx.drawImage(glow[h],px[i]-size/2,py[i]-size/2,size,size);}
+  tctx.globalAlpha=1;
+
+  // 2) visible: background
+  ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1;
+  ctx.drawImage(bgCv,0,0,VW,VH);
+  // parallax stars
+  starT+=dt; ctx.globalCompositeOperation='lighter';
+  for(const st of stars){st.x-=st.z*0.15; if(st.x<0)st.x+=VW; const tw=0.4+0.6*Math.abs(Math.sin(starT*1.2+st.tw));const s=st.s*(1+st.z);ctx.globalAlpha=tw*0.5*st.z;ctx.drawImage(starSprite,st.x-s*3,st.y-s*3,s*6,s*6);}
+  ctx.globalAlpha=1;
+
+  // 3) swarm trails (sharp) + bloom
+  ctx.globalCompositeOperation='lighter';
+  ctx.drawImage(trailCv,0,0,VW,VH);
+  if(!LOWQ){
+    bctx.setTransform(1,0,0,1,0,0);
+    bctx.clearRect(0,0,BW,BH);
+    bctx.filter='blur(4px)';
+    bctx.drawImage(trailCv,0,0,BW,BH);
+    bctx.filter='none';
+    ctx.globalAlpha=0.6+S.energy*0.25;
+    ctx.drawImage(bloomCv,0,0,VW,VH);
+    ctx.globalAlpha=1;
+  }
+
+  // 4) lights (radiant)
+  for(const L of lights){
+    const pu=0.75+Math.sin(S.t*3+L.ph)*0.25, sz=26+L.charge*22;
+    ctx.globalAlpha=0.5*pu+L.charge*0.4; ctx.drawImage(lightCore,L.x-sz/2,L.y-sz/2,sz,sz);
+    const fl=(40+L.charge*40)*(0.9+pu*0.2);
+    ctx.globalAlpha=0.35+L.charge*0.4; ctx.save(); ctx.translate(L.x,L.y); ctx.rotate(S.t*0.3+L.ph); ctx.drawImage(flare,-fl/2,-fl/2,fl,fl); ctx.restore();
+  }
+  ctx.globalAlpha=1;
+
+  // 5) particles
+  for(const p of fxp){const k=1-p.t/p.life;ctx.globalAlpha=k*(p.dark?0.5:0.75);const sp=p.dark?voidRing:lightCore;const sz=p.dark?22:12;ctx.drawImage(sp,p.x-sz/2,p.y-sz/2,sz,sz);}
+  ctx.globalAlpha=1;
+
+  // 6) void predators (drawn over glow): dark core occludes, corona glows
+  for(const D of preds){
+    const pu=0.9+Math.sin(S.t*4+D.ph)*0.12, sz=D.r*3.0*pu;
+    ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=0.95;
+    ctx.drawImage(voidCore,D.x-sz/2,D.y-sz/2,sz,sz);
+    ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=0.9;
+    ctx.save();ctx.translate(D.x,D.y);ctx.rotate(D.rot);const rs=sz*1.15;ctx.drawImage(voidRing,-rs/2,-rs/2,rs,rs);ctx.restore();
+  }
+  ctx.globalAlpha=1; ctx.globalCompositeOperation='lighter';
+
+  // 7) pointer
+  if(P.active&&S.mode!=='over'){ctx.globalAlpha=P.down?0.5:0.2;const ps=P.down?96:56;ctx.drawImage(glow[2],P.x-ps/2,P.y-ps/2,ps,ps);}
+  ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
+}
+const lerp=(a,b,t)=>a+(b-a)*t;
 
 /* ---------- loop ---------- */
-let last=performance.now(),fps=60,frames=0,fpsT=0;
+let last=performance.now(),fps=60,frames=0,fpsT=0,LOWQ=false;
 function simTick(dt){
-  S.t+=dt;
-  buildGrid();
-  stepFlock();
-  centroid();
+  S.t+=dt; buildGrid(); stepFlock(); centroid();
   if(S.mode==='play')stepPlay(dt);
-  else{ // title/over: keep swarm alive & roaming, predators drift idle
-    for(const D of preds){D.x+=D.vx*0.3;D.y+=D.vy*0.3;}
-  }
+  else{ for(const D of preds){D.x+=D.vx*0.3;D.y+=D.vy*0.3;} }
   stepFx(dt);
   S.shake=Math.max(0,S.shake-dt*3);
 }
@@ -212,21 +338,28 @@ function frame(now){
   requestAnimationFrame(frame);
   const dtms=now-last;last=now;const dt=Math.min(dtms/1000,0.05);
   simTick(dt);
-  // camera shake via canvas translate
   if(S.shake>0){ctx.setTransform(DPR,0,0,DPR,rnd(-1,1)*S.shake*6*DPR,rnd(-1,1)*S.shake*6*DPR);}else ctx.setTransform(DPR,0,0,DPR,0,0);
-  render();
+  render(dt);
   S.dispScore+=(S.score-S.dispScore)*0.15;
   if(S.mode==='play'){document.querySelector('#hud .sc').textContent=Math.round(S.dispScore);document.querySelector('#hud .sz').textContent='swarm · '+N;}
-  frames++;fpsT+=dtms;if(fpsT>=500){fps=Math.round(frames/(fpsT/1000));frames=0;fpsT=0;document.getElementById('stat').textContent=N+' motes · '+fps+' fps';}
+  frames++;fpsT+=dtms;if(fpsT>=600){fps=Math.round(frames/(fpsT/1000));frames=0;fpsT=0;LOWQ=fps<42;}
 }
-requestAnimationFrame(frame);
+function boot(){
+  DPR=Math.min(devicePixelRatio||1,1.5);
+  resize();
+  P.x=VW/2;P.y=VH/2;
+  seedSwarm(220);
+  if(S.best>0)document.getElementById('best0').textContent='best · '+S.best;
+  if(MUTE)document.getElementById('sound').textContent='🔇';
+  requestAnimationFrame(frame);
+}
+boot();
 
 /* ---------- debug ---------- */
 window.__mur={
-  info:()=>({mode:S.mode,n:N,fps,score:Math.round(S.score),maxSize:S.maxSize,lights:lights.length,preds:preds.length,best:S.best}),
+  info:()=>({mode:S.mode,n:N,fps,score:Math.round(S.score),maxSize:S.maxSize,lights:lights.length,preds:preds.length,energy:+S.energy.toFixed(2),lowq:LOWQ,best:S.best}),
   start:()=>startPlay(),
   move:(x,y,down)=>{P.x=x;P.y=y;P.active=true;P.down=!!down;onInteract();return window.__mur.info();},
-  // auto-player: synchronously step the sim, steering toward nearest light (rAF-throttle-proof)
   bot:(secs)=>{
     if(S.mode!=='play')startPlay();
     let steps=Math.floor((secs||5)*60);

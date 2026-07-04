@@ -4,231 +4,240 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>MURMUR — guide the living swarm</title>
-<meta name="description" content="Guide a living swarm of light. Move, and thousands of glowing motes flow after you like a murmuration.">
+<meta name="description" content="Guide a living swarm of light. Absorb the lights to grow, and keep your swarm alive as the dark hunts it.">
 <meta name="theme-color" content="#05070f">
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#05070f;cursor:none;touch-action:none}
   #c{display:block}
   #ui{position:fixed;inset:0;pointer-events:none;font-family:'Segoe UI',Arial,sans-serif;color:#dbeafe}
-  #title{position:absolute;left:0;right:0;top:38%;text-align:center;transition:opacity 1.2s}
+  #title{position:absolute;left:0;right:0;top:30%;text-align:center;transition:opacity 1s}
   #title h1{margin:0;font-size:15vmin;font-weight:200;letter-spacing:1.2vmin;
     background:linear-gradient(90deg,#67e8f9,#a5b4fc,#f0abfc,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 0 24px rgba(103,232,249,.35))}
   #title p{margin:1vmin 0 0;font-size:2.6vmin;font-weight:300;letter-spacing:.5vmin;color:#93a3c0}
-  #hint{position:absolute;left:0;right:0;bottom:6%;text-align:center;font-size:2.2vmin;color:#5b6b8c;font-weight:300;letter-spacing:.4vmin;opacity:.9}
-  #stat{position:absolute;top:10px;left:12px;font-size:12px;color:#31405f;font-variant-numeric:tabular-nums}
-  .fade{opacity:0!important}
+  #title .go{margin-top:3vmin;font-size:3vmin;font-weight:400;color:#e0f2fe;opacity:.9;animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+  #hud{position:absolute;top:16px;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s}
+  #hud .sc{font-size:5vmin;font-weight:300;letter-spacing:.4vmin;font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(103,232,249,.5)}
+  #hud .sz{font-size:2vmin;color:#7b8bb0;font-weight:300;letter-spacing:.3vmin}
+  #over{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(5,7,15,.55)}
+  #over h2{margin:0;font-size:9vmin;font-weight:200;letter-spacing:1vmin;color:#e0e7ff}
+  #over .r{font-size:3vmin;color:#93a3c0;font-weight:300;margin-top:1vmin}
+  #over .b{font-size:2.4vmin;color:#fde68a;margin-top:1.5vmin;font-weight:300}
+  #over .again{margin-top:4vmin;font-size:3vmin;color:#e0f2fe;font-weight:400;animation:pulse 1.6s ease-in-out infinite}
+  #stat{position:absolute;bottom:8px;left:10px;font-size:11px;color:#26334d;font-variant-numeric:tabular-nums}
+  .fade{opacity:0!important} .show{opacity:1!important} .flex{display:flex!important}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div id="ui">
-  <div id="title"><h1>MURMUR</h1><p>move to guide the swarm</p></div>
-  <div id="hint">move your cursor &nbsp;·&nbsp; hold to gather</div>
+  <div id="title"><h1>MURMUR</h1><p>a living swarm of light</p><div class="go">move to begin</div></div>
+  <div id="hud"><div class="sc">0</div><div class="sz">swarm · 0</div></div>
+  <div id="over"><h2>CONSUMED</h2><div class="r"></div><div class="b"></div><div class="again">move to begin again</div></div>
   <div id="stat"></div>
 </div>
 <script>
 'use strict';
-/* ================= MURMUR — Phase 1: the living swarm =================
-   Flocking (boids) + cursor attraction, additive glow, fading light-trails.
-   Goal of this phase: prove it is mesmerising AND holds 60fps.
-====================================================================== */
-
+/* ================= MURMUR — Phase 2: the game =================
+   Flocking swarm you guide. Absorb lights to grow; the dark hunts
+   and eats your motes. Grow big, stay alive, chase the score.
+=============================================================== */
 const cv=document.getElementById('c'), ctx=cv.getContext('2d',{alpha:false});
-let DPR=Math.min(devicePixelRatio||1, 1.5);
-let VW=0,VH=0;
-function resize(){
-  VW=innerWidth; VH=innerHeight;
-  cv.width=VW*DPR; cv.height=VH*DPR;
-  cv.style.width=VW+'px'; cv.style.height=VH+'px';
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  ctx.fillStyle='#05070f'; ctx.fillRect(0,0,VW,VH);
-}
-addEventListener('resize',resize); resize();
+let DPR=Math.min(devicePixelRatio||1,1.5), VW=0,VH=0;
+function resize(){VW=innerWidth;VH=innerHeight;cv.width=VW*DPR;cv.height=VH*DPR;cv.style.width=VW+'px';cv.style.height=VH+'px';ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#05070f';ctx.fillRect(0,0,VW,VH);}
+addEventListener('resize',resize);resize();
 
-/* ---------- pre-rendered tinted glow sprites ---------- */
+/* ---------- glow sprites ---------- */
 const PALETTE=['#67e8f9','#38bdf8','#818cf8','#a78bfa','#e879f9','#f0abfc','#fde68a','#5eead4'];
 const SPRITE=64;
-const glowSprites=PALETTE.map(col=>{
-  const s=document.createElement('canvas'); s.width=SPRITE; s.height=SPRITE;
-  const g=s.getContext('2d');
-  const grd=g.createRadialGradient(SPRITE/2,SPRITE/2,0,SPRITE/2,SPRITE/2,SPRITE/2);
-  grd.addColorStop(0,'rgba(255,255,255,0.95)');
-  grd.addColorStop(0.22, col);
-  grd.addColorStop(1,'rgba(0,0,0,0)');
-  g.fillStyle=grd; g.beginPath(); g.arc(SPRITE/2,SPRITE/2,SPRITE/2,0,7); g.fill();
-  return s;
-});
+function makeGlow(inner,mid){const s=document.createElement('canvas');s.width=SPRITE;s.height=SPRITE;const g=s.getContext('2d');const grd=g.createRadialGradient(SPRITE/2,SPRITE/2,0,SPRITE/2,SPRITE/2,SPRITE/2);grd.addColorStop(0,inner);grd.addColorStop(0.22,mid);grd.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=grd;g.beginPath();g.arc(SPRITE/2,SPRITE/2,SPRITE/2,0,7);g.fill();return s;}
+const glowSprites=PALETTE.map(c=>makeGlow('rgba(255,255,255,0.95)',c));
+const lightSprite=makeGlow('rgba(255,255,255,1)','#fde68a');
+const darkSprite=(()=>{const s=document.createElement('canvas');s.width=SPRITE;s.height=SPRITE;const g=s.getContext('2d');const grd=g.createRadialGradient(SPRITE/2,SPRITE/2,0,SPRITE/2,SPRITE/2,SPRITE/2);grd.addColorStop(0,'rgba(0,0,0,0)');grd.addColorStop(0.5,'rgba(80,10,40,0.0)');grd.addColorStop(0.72,'rgba(244,63,94,0.6)');grd.addColorStop(0.85,'rgba(120,20,60,0.35)');grd.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=grd;g.beginPath();g.arc(SPRITE/2,SPRITE/2,SPRITE/2,0,7);g.fill();return s;})();
 
-/* ---------- swarm data ---------- */
+/* ---------- swarm (capacity arrays) ---------- */
+const CAP=2000;
+const px=new Float32Array(CAP),py=new Float32Array(CAP),vx=new Float32Array(CAP),vy=new Float32Array(CAP),hue=new Uint8Array(CAP),dead=new Uint8Array(CAP);
 let N=0;
-let px,py,vx,vy,hue;
-function targetN(){
-  const area=VW*VH;
-  const n=Math.round(area/1400);      // ~ one agent per 1400 css px^2
-  return Math.max(300, Math.min(1400, n));
-}
-function initSwarm(){
-  N=targetN();
-  px=new Float32Array(N); py=new Float32Array(N);
-  vx=new Float32Array(N); vy=new Float32Array(N);
-  hue=new Uint8Array(N);
-  for(let i=0;i<N;i++){
-    const a=Math.random()*Math.PI*2, r=Math.random()*Math.min(VW,VH)*0.3;
-    px[i]=VW/2+Math.cos(a)*r; py[i]=VH/2+Math.sin(a)*r;
-    vx[i]=Math.cos(a)*0.6; vy[i]=Math.sin(a)*0.6;
-    hue[i]=(Math.random()*PALETTE.length)|0;
-  }
-}
-initSwarm();
+function addMote(x,y){if(N>=CAP)return;px[N]=x+rnd(-6,6);py[N]=y+rnd(-6,6);const a=Math.random()*7;vx[N]=Math.cos(a)*1.5;vy[N]=Math.sin(a)*1.5;hue[N]=(Math.random()*PALETTE.length)|0;N++;}
+function seedSwarm(n){N=0;for(let i=0;i<n;i++){const a=Math.random()*7,r=Math.random()*140;addMote(VW/2+Math.cos(a)*r,VH/2+Math.sin(a)*r);}}
+const rnd=(a,b)=>a+Math.random()*(b-a);
 
 /* ---------- spatial grid ---------- */
-const NEI=30;                      // neighbour radius
-const CELL=NEI;
-let cols,rows,cellHead,cellNext;
-function buildGrid(){
-  cols=Math.max(1,Math.ceil(VW/CELL)); rows=Math.max(1,Math.ceil(VH/CELL));
-  cellHead=new Int32Array(cols*rows).fill(-1);
-  cellNext=new Int32Array(N);
-  for(let i=0;i<N;i++){
-    let cx=(px[i]/CELL)|0, cy=(py[i]/CELL)|0;
-    cx=cx<0?0:cx>=cols?cols-1:cx; cy=cy<0?0:cy>=rows?rows-1:cy;
-    const c=cy*cols+cx;
-    cellNext[i]=cellHead[c]; cellHead[c]=i;
-  }
-}
+const NEI=30,CELL=NEI;let cols,rows,cellHead,cellNext=new Int32Array(CAP);
+function buildGrid(){cols=Math.max(1,Math.ceil(VW/CELL));rows=Math.max(1,Math.ceil(VH/CELL));const nc=cols*rows;if(!cellHead||cellHead.length<nc)cellHead=new Int32Array(nc);for(let c=0;c<nc;c++)cellHead[c]=-1;for(let i=0;i<N;i++){let cx=(px[i]/CELL)|0,cy=(py[i]/CELL)|0;cx=cx<0?0:cx>=cols?cols-1:cx;cy=cy<0?0:cy>=rows?rows-1:cy;const c=cy*cols+cx;cellNext[i]=cellHead[c];cellHead[c]=i;}}
+function nearMotes(x,y,r,cb){let cx=(x/CELL)|0,cy=(y/CELL)|0;cx=cx<0?0:cx>=cols?cols-1:cx;cy=cy<0?0:cy>=rows?rows-1:cy;const cr=Math.ceil(r/CELL),r2=r*r;for(let gy=cy-cr;gy<=cy+cr;gy++){if(gy<0||gy>=rows)continue;for(let gx=cx-cr;gx<=cx+cr;gx++){if(gx<0||gx>=cols)continue;let j=cellHead[gy*cols+gx];while(j!==-1){const dx=px[j]-x,dy=py[j]-y;if(dx*dx+dy*dy<r2)cb(j);j=cellNext[j];}}}}
 
 /* ---------- pointer ---------- */
 const P={x:VW/2,y:VH/2,active:false,down:false};
-function setP(e){const t=e.touches?e.touches[0]:e; if(!t)return; P.x=t.clientX; P.y=t.clientY; P.active=true; hideTitle();}
+function setP(e){const t=e.touches?e.touches[0]:e;if(!t)return;P.x=t.clientX;P.y=t.clientY;P.active=true;onInteract();}
 cv.addEventListener('mousemove',setP);
 cv.addEventListener('mousedown',e=>{P.down=true;setP(e);});
 addEventListener('mouseup',()=>P.down=false);
 cv.addEventListener('touchstart',e=>{P.down=true;setP(e);e.preventDefault();},{passive:false});
 cv.addEventListener('touchmove',e=>{setP(e);e.preventDefault();},{passive:false});
 addEventListener('touchend',()=>P.down=false);
+function onInteract(){ if(S.mode==='title'||S.mode==='over') startPlay(); }
 
-let titleHidden=false;
-function hideTitle(){if(titleHidden)return;titleHidden=true;document.getElementById('title').classList.add('fade');document.getElementById('hint').classList.add('fade');}
+/* ---------- lights (food) & predators (dark) ---------- */
+let lights=[], preds=[];
+function spawnLight(){const m=90;lights.push({x:rnd(m,VW-m),y:rnd(m,VH-m),charge:0,ph:Math.random()*7});}
+function spawnPred(){const edge=Math.floor(Math.random()*4);let x,y;if(edge<2){x=edge?VW+40:-40;y=rnd(0,VH);}else{x=rnd(0,VW);y=edge===2?-40:VH+40;}preds.push({x,y,vx:0,vy:0,r:26,ph:Math.random()*7});}
 
-/* ---------- flocking params ---------- */
-const MAXSPD=3.4, MINSPD=1.2, MAXF=0.16;
-const SEP=13, SEPW=1.7, ALIW=1.0, COHW=0.9;
-const WANDER=0.05;
-let t=0;
+/* ---------- state ---------- */
+const S={mode:'title',t:0,score:0,dispScore:0,best:+(localStorage.getItem('mur_best')||0),maxSize:0,shake:0,birth:0};
+function startPlay(){
+  S.mode='play';S.t=0;S.score=0;S.dispScore=0;S.maxSize=0;
+  seedSwarm(220);
+  lights=[];for(let i=0;i<7;i++)spawnLight();
+  preds=[];spawnPred();
+  document.getElementById('title').classList.add('fade');
+  document.getElementById('over').classList.remove('flex');
+  document.getElementById('hud').classList.add('show');
+}
+function gameOver(){
+  S.mode='over';
+  if(S.score>S.best){S.best=Math.round(S.score);localStorage.setItem('mur_best',S.best);}
+  const o=document.getElementById('over');o.classList.add('flex');
+  o.querySelector('.r').textContent='swarm peaked at '+S.maxSize+' motes · '+Math.round(S.score)+' points';
+  o.querySelector('.b').textContent=(Math.round(S.score)>=S.best?'★ new best ':'best ')+S.best;
+  document.getElementById('hud').classList.remove('show');
+}
 
-function step(){
-  t+=1;
-  buildGrid();
-  const sep2=SEP*SEP, nei2=NEI*NEI;
-  const pull = P.down?0.05:0.018;       // hold = gather harder
+/* ---------- flocking ---------- */
+const MAXSPD=3.6,MINSPD=1.3,MAXF=0.17,SEP=13,SEPW=1.7,ALIW=1.0,COHW=0.9,WANDER=0.05;
+function stepFlock(){
+  const sep2=SEP*SEP,nei2=NEI*NEI,pull=P.down?0.05:0.02;
   for(let i=0;i<N;i++){
     const x=px[i],y=py[i],ix=vx[i],iy=vy[i];
-    let sx=0,sy=0, ax=0,ay=0, cxs=0,cys=0, cnt=0, scnt=0;
-    let cx=(x/CELL)|0, cy=(y/CELL)|0;
-    cx=cx<0?0:cx>=cols?cols-1:cx; cy=cy<0?0:cy>=rows?rows-1:cy;
-    let checked=0;
-    for(let gy=cy-1;gy<=cy+1;gy++){
-      if(gy<0||gy>=rows)continue;
-      for(let gx=cx-1;gx<=cx+1;gx++){
-        if(gx<0||gx>=cols)continue;
-        let j=cellHead[gy*cols+gx];
-        while(j!==-1){
-          if(j!==i && checked<24){
-            const dx=px[j]-x, dy=py[j]-y, d2=dx*dx+dy*dy;
-            if(d2<nei2){
-              checked++;
-              ax+=vx[j]; ay+=vy[j];
-              cxs+=px[j]; cys+=py[j]; cnt++;
-              if(d2<sep2 && d2>0.0001){ const inv=1/Math.sqrt(d2); sx-=dx*inv; sy-=dy*inv; scnt++; }
-            }
-          }
-          j=cellNext[j];
-        }
-      }
-    }
+    let sx=0,sy=0,ax=0,ay=0,cxs=0,cys=0,cnt=0,scnt=0,checked=0;
+    let cx=(x/CELL)|0,cy=(y/CELL)|0;cx=cx<0?0:cx>=cols?cols-1:cx;cy=cy<0?0:cy>=rows?rows-1:cy;
+    for(let gy=cy-1;gy<=cy+1;gy++){if(gy<0||gy>=rows)continue;for(let gx=cx-1;gx<=cx+1;gx++){if(gx<0||gx>=cols)continue;let j=cellHead[gy*cols+gx];while(j!==-1){if(j!==i&&checked<22){const dx=px[j]-x,dy=py[j]-y,d2=dx*dx+dy*dy;if(d2<nei2){checked++;ax+=vx[j];ay+=vy[j];cxs+=px[j];cys+=py[j];cnt++;if(d2<sep2&&d2>0.0001){const inv=1/Math.sqrt(d2);sx-=dx*inv;sy-=dy*inv;scnt++;}}}j=cellNext[j];}}}
     let fx=0,fy=0;
-    if(scnt>0){ fx+=(sx/scnt)*SEPW; fy+=(sy/scnt)*SEPW; }
-    if(cnt>0){
-      // alignment
-      let alx=ax/cnt-ix, aly=ay/cnt-iy; fx+=alx*ALIW*0.12; fy+=aly*ALIW*0.12;
-      // cohesion
-      let clx=cxs/cnt-x, cly=cys/cnt-y; const cl=Math.hypot(clx,cly)||1; fx+=(clx/cl)*COHW*0.4; fy+=(cly/cl)*COHW*0.4;
-    }
-    // cursor attraction
-    const dxp=P.x-x, dyp=P.y-y, dp=Math.hypot(dxp,dyp)||1;
-    const aw=pull*Math.min(1,dp/260);
-    fx+=(dxp/dp)*aw*8; fy+=(dyp/dp)*aw*8;
-    // gentle swirl around pointer (murmuration curl)
-    fx+=(-dyp/dp)*aw*3; fy+=(dxp/dp)*aw*3;
-    // wander
-    fx+=Math.cos(t*0.01+i)*WANDER; fy+=Math.sin(t*0.013+i*1.3)*WANDER;
-    // soft edges
-    if(x<40)fx+=(40-x)*0.02; else if(x>VW-40)fx-=(x-(VW-40))*0.02;
-    if(y<40)fy+=(40-y)*0.02; else if(y>VH-40)fy-=(y-(VH-40))*0.02;
-    // clamp force
-    const fl=Math.hypot(fx,fy); if(fl>MAXF){fx=fx/fl*MAXF; fy=fy/fl*MAXF;}
-    let nvx=ix+fx, nvy=iy+fy;
-    let sp=Math.hypot(nvx,nvy);
-    if(sp>MAXSPD){nvx=nvx/sp*MAXSPD; nvy=nvy/sp*MAXSPD;}
-    else if(sp<MINSPD && sp>0.001){nvx=nvx/sp*MINSPD; nvy=nvy/sp*MINSPD;}
-    vx[i]=nvx; vy[i]=nvy;
-    px[i]=x+nvx; py[i]=y+nvy;
+    if(scnt>0){fx+=(sx/scnt)*SEPW;fy+=(sy/scnt)*SEPW;}
+    if(cnt>0){fx+=(ax/cnt-ix)*ALIW*0.12;fy+=(ay/cnt-iy)*ALIW*0.12;let clx=cxs/cnt-x,cly=cys/cnt-y;const cl=Math.hypot(clx,cly)||1;fx+=(clx/cl)*COHW*0.4;fy+=(cly/cl)*COHW*0.4;}
+    const dxp=P.x-x,dyp=P.y-y,dp=Math.hypot(dxp,dyp)||1,aw=pull*Math.min(1,dp/260);
+    fx+=(dxp/dp)*aw*8;fy+=(dyp/dp)*aw*8;fx+=(-dyp/dp)*aw*3;fy+=(dxp/dp)*aw*3;
+    fx+=Math.cos(S.t*0.6+i)*WANDER;fy+=Math.sin(S.t*0.78+i*1.3)*WANDER;
+    if(x<40)fx+=(40-x)*0.02;else if(x>VW-40)fx-=(x-(VW-40))*0.02;
+    if(y<40)fy+=(40-y)*0.02;else if(y>VH-40)fy-=(y-(VH-40))*0.02;
+    // flee predators — the swarm parts and flows around the dark
+    for(let pi=0;pi<preds.length;pi++){const D=preds[pi];const ex=x-D.x,ey=y-D.y,e2=ex*ex+ey*ey;if(e2<9025&&e2>1){const inv=1/Math.sqrt(e2);const w=(1-Math.sqrt(e2)/95)*1.3;fx+=ex*inv*w;fy+=ey*inv*w;}}
+    const fl=Math.hypot(fx,fy);if(fl>MAXF){fx=fx/fl*MAXF;fy=fy/fl*MAXF;}
+    let nvx=ix+fx,nvy=iy+fy,sp=Math.hypot(nvx,nvy);
+    if(sp>MAXSPD){nvx=nvx/sp*MAXSPD;nvy=nvy/sp*MAXSPD;}else if(sp<MINSPD&&sp>0.001){nvx=nvx/sp*MINSPD;nvy=nvy/sp*MINSPD;}
+    vx[i]=nvx;vy[i]=nvy;px[i]=x+nvx;py[i]=y+nvy;
   }
 }
+
+/* ---------- swarm centroid ---------- */
+let cenx=0,ceny=0;
+function centroid(){let sx=0,sy=0;for(let i=0;i<N;i++){sx+=px[i];sy+=py[i];}cenx=N?sx/N:VW/2;ceny=N?sy/N:VH/2;}
+
+/* ---------- lights + predators ---------- */
+function stepPlay(dt){
+  // difficulty ramps with time + score (gentle early, so you can grow first)
+  const wantPreds=1+Math.floor(S.t/20)+Math.floor(S.score/900);
+  while(preds.length<Math.min(8,wantPreds))spawnPred();
+  // lights: absorb when swarm dwells on them
+  for(const L of lights){
+    let near=0; nearMotes(L.x,L.y,28,()=>{near++;});
+    L.charge=Math.min(1,L.charge + near*dt*0.03);
+    if(L.charge>=1){
+      const gain=24; for(let k=0;k<gain;k++)addMote(L.x,L.y);
+      S.score+=60; S.shake=Math.min(1,S.shake+0.35);
+      burst(L.x,L.y,26,true);
+      L.x=rnd(90,VW-90);L.y=rnd(90,VH-90);L.charge=0;
+    }
+  }
+  // predators: home toward swarm centroid, NIBBLE motes on contact (capped per frame)
+  let anyDead=false;
+  for(const D of preds){
+    const dx=cenx-D.x,dy=ceny-D.y,d=Math.hypot(dx,dy)||1;
+    const spd=(0.55+S.t*0.0035);
+    D.vx=D.vx*0.94+(dx/d)*spd*0.14; D.vy=D.vy*0.94+(dy/d)*spd*0.14;
+    D.x+=D.vx; D.y+=D.vy;
+    let bites=0; nearMotes(D.x,D.y,16,(j)=>{if(bites<2&&!dead[j]){dead[j]=1;anyDead=true;bites++;}});
+  }
+  if(anyDead){
+    // compact out dead motes + dark puff
+    let w=0;
+    for(let i=0;i<N;i++){if(dead[i]){dead[i]=0;if(Math.random()<0.5)darkPuff(px[i],py[i]);continue;}if(w!==i){px[w]=px[i];py[w]=py[i];vx[w]=vx[i];vy[w]=vy[i];hue[w]=hue[i];}w++;}
+    N=w; S.shake=Math.min(1,S.shake+0.25);
+  }
+  if(N>S.maxSize)S.maxSize=N;
+  S.score+=dt*4*Math.min(4,N/300);   // survival + size drip
+  if(N<50){gameOver();}
+}
+
+/* ---------- particles ---------- */
+const fx=[];
+function burst(x,y,n,warm){for(let i=0;i<n;i++){const a=Math.random()*7,s=rnd(2,7);fx.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t:0,life:rnd(.4,.9),warm});}}
+function darkPuff(x,y){fx.push({x,y,vx:rnd(-1,1),vy:rnd(-1,1),t:0,life:.5,dark:true});}
+function stepFx(dt){for(let i=fx.length-1;i>=0;i--){const p=fx[i];p.t+=dt;p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;if(p.t>=p.life)fx.splice(i,1);}}
 
 /* ---------- render ---------- */
 function render(){
-  // fade previous frame → light trails
-  ctx.globalCompositeOperation='source-over';
-  ctx.fillStyle='rgba(5,7,15,0.14)';
-  ctx.fillRect(0,0,VW,VH);
-  // draw glowing agents additively
+  ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(5,7,15,0.15)';ctx.fillRect(0,0,VW,VH);
   ctx.globalCompositeOperation='lighter';
-  for(let i=0;i<N;i++){
-    const sp=Math.hypot(vx[i],vy[i]);
-    const h=(hue[i]+((sp*1.5)|0))%PALETTE.length;
-    const size=6+sp*2.2;
-    const s=glowSprites[h];
-    ctx.globalAlpha=0.55;
-    ctx.drawImage(s, px[i]-size/2, py[i]-size/2, size, size);
-  }
+  // lights
+  for(const L of lights){const pu=0.8+Math.sin(S.t*3+L.ph)*0.2,sz=18+L.charge*16;ctx.globalAlpha=0.5*pu+L.charge*0.4;ctx.drawImage(lightSprite,L.x-sz/2,L.y-sz/2,sz,sz);}
+  // motes
+  for(let i=0;i<N;i++){const sp=Math.hypot(vx[i],vy[i]),h=(hue[i]+((sp*1.5)|0))%PALETTE.length,size=6+sp*2.2;ctx.globalAlpha=0.55;ctx.drawImage(glowSprites[h],px[i]-size/2,py[i]-size/2,size,size);}
+  // particles
+  for(const p of fx){const k=1-p.t/p.life;ctx.globalAlpha=k*(p.dark?0.5:0.7);const sp=p.dark?darkSprite:lightSprite;const sz=p.dark?22:10;ctx.drawImage(sp,p.x-sz/2,p.y-sz/2,sz,sz);}
+  // predators (drawn last, over the glow)
+  for(const D of preds){const pu=0.85+Math.sin(S.t*4+D.ph)*0.15,sz=D.r*3.2*pu;ctx.globalAlpha=0.9;ctx.drawImage(darkSprite,D.x-sz/2,D.y-sz/2,sz,sz);}
+  // pointer
+  if(P.active&&S.mode!=='over'){ctx.globalAlpha=P.down?0.5:0.2;const ps=P.down?90:56;ctx.drawImage(glowSprites[0],P.x-ps/2,P.y-ps/2,ps,ps);}
   ctx.globalAlpha=1;
-  // pointer glow
-  if(P.active){
-    ctx.globalCompositeOperation='lighter';
-    ctx.globalAlpha=P.down?0.5:0.22;
-    const ps=P.down?90:60;
-    ctx.drawImage(glowSprites[6], P.x-ps/2, P.y-ps/2, ps, ps);
-    ctx.globalAlpha=1;
-  }
 }
 
-/* ---------- loop + fps ---------- */
-let last=performance.now(), fps=60, acc=0, frames=0, fpsT=0;
+/* ---------- loop ---------- */
+let last=performance.now(),fps=60,frames=0,fpsT=0;
+function simTick(dt){
+  S.t+=dt;
+  buildGrid();
+  stepFlock();
+  centroid();
+  if(S.mode==='play')stepPlay(dt);
+  else{ // title/over: keep swarm alive & roaming, predators drift idle
+    for(const D of preds){D.x+=D.vx*0.3;D.y+=D.vy*0.3;}
+  }
+  stepFx(dt);
+  S.shake=Math.max(0,S.shake-dt*3);
+}
 function frame(now){
   requestAnimationFrame(frame);
-  const dt=now-last; last=now;
-  step();
+  const dtms=now-last;last=now;const dt=Math.min(dtms/1000,0.05);
+  simTick(dt);
+  // camera shake via canvas translate
+  if(S.shake>0){ctx.setTransform(DPR,0,0,DPR,rnd(-1,1)*S.shake*6*DPR,rnd(-1,1)*S.shake*6*DPR);}else ctx.setTransform(DPR,0,0,DPR,0,0);
   render();
-  frames++; fpsT+=dt;
-  if(fpsT>=500){ fps=Math.round(frames/(fpsT/1000)); frames=0; fpsT=0;
-    document.getElementById('stat').textContent=N+' motes · '+fps+' fps';
-    // auto-tune: if struggling, trim the swarm
-    if(fps<48 && N>350){ trim(120); }
-  }
-}
-function trim(k){
-  const nn=Math.max(300,N-k);
-  px=px.slice(0,nn); py=py.slice(0,nn); vx=vx.slice(0,nn); vy=vy.slice(0,nn); hue=hue.slice(0,nn); N=nn;
+  S.dispScore+=(S.score-S.dispScore)*0.15;
+  if(S.mode==='play'){document.querySelector('#hud .sc').textContent=Math.round(S.dispScore);document.querySelector('#hud .sz').textContent='swarm · '+N;}
+  frames++;fpsT+=dtms;if(fpsT>=500){fps=Math.round(frames/(fpsT/1000));frames=0;fpsT=0;document.getElementById('stat').textContent=N+' motes · '+fps+' fps';}
 }
 requestAnimationFrame(frame);
 
 /* ---------- debug ---------- */
 window.__mur={
-  info:()=>({n:N,fps,pointer:{x:Math.round(P.x),y:Math.round(P.y),down:P.down},vw:VW,vh:VH}),
-  move:(x,y,down)=>{P.x=x;P.y=y;P.active=true;P.down=!!down;hideTitle();return window.__mur.info();},
-  setN:(n)=>{N=Math.max(50,Math.min(2000,n|0));initSwarm();return N;},
+  info:()=>({mode:S.mode,n:N,fps,score:Math.round(S.score),maxSize:S.maxSize,lights:lights.length,preds:preds.length,best:S.best}),
+  start:()=>startPlay(),
+  move:(x,y,down)=>{P.x=x;P.y=y;P.active=true;P.down=!!down;onInteract();return window.__mur.info();},
+  // auto-player: synchronously step the sim, steering toward nearest light (rAF-throttle-proof)
+  bot:(secs)=>{
+    if(S.mode!=='play')startPlay();
+    let steps=Math.floor((secs||5)*60);
+    while(steps-->0){
+      let best=null,bd=1e9;for(const L of lights){const d=Math.hypot(L.x-cenx,L.y-ceny);if(d<bd){bd=d;best=L;}}
+      if(best){P.x=best.x;P.y=best.y;P.active=true;P.down=true;}
+      simTick(1/60);
+      if(S.mode==='over')break;
+    }
+    return window.__mur.info();
+  },
 };
 </script>
 </body>

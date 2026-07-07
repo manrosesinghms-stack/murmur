@@ -424,6 +424,7 @@ function simTick(dt){
 function frame(now){
   requestAnimationFrame(frame);
   const dtms=now-last;last=now;const dt=Math.min(dtms/1000,0.05);
+  if(S.autoP&&S.mode==='play'){let best=null,bd=1e9;for(const L of lights){const d=Math.hypot(L.x-cenx,L.y-ceny);if(d<bd){bd=d;best=L;}}for(const pw of powerups){const d=Math.hypot(pw.x-cenx,pw.y-ceny);if(d<bd*0.7){bd=d;best=pw;}}if(best){P.x=best.x;P.y=best.y;P.active=true;P.down=true;}}
   simTick(dt);
   if(S.shake>0){ctx.setTransform(DPR,0,0,DPR,rnd(-1,1)*S.shake*6*DPR,rnd(-1,1)*S.shake*6*DPR);}else ctx.setTransform(DPR,0,0,DPR,0,0);
   render(dt);
@@ -444,6 +445,8 @@ window.__mur={
   info:()=>({mode:S.mode,phase:S.phase,depth:S.depth,depthName:DEPTHS[S.depth].name,n:N,fps,score:Math.round(S.score),maxSize:S.maxSize,mile:S.milestone,homers:preds.filter(p=>p.type==='home').length,drifters:preds.filter(p=>p.type==='drift').length,powerups:powerups.length,frenzy:+S.frenzyT.toFixed(1),theme:S.theme,best:S.best,coach:document.getElementById('coach').textContent}),
   start:()=>startPlay(),
   move:(x,y,down)=>{P.x=x;P.y=y;P.active=true;P.down=!!down;onInteract();return window.__mur.info();},
+  auto:(v)=>{S.autoP=!!v;if(v&&S.mode!=='play')startPlay();return 'auto '+!!v;},
+  capframe:(steps)=>{steps=steps||1;for(let k=0;k<steps;k++){if(S.mode==='play'){let best=null,bd=1e9;for(const L of lights){const d=Math.hypot(L.x-cenx,L.y-ceny);if(d<bd){bd=d;best=L;}}for(const pw of powerups){const d=Math.hypot(pw.x-cenx,pw.y-ceny);if(d<bd*0.7){bd=d;best=pw;}}if(best){P.x=best.x;P.y=best.y;P.active=true;P.down=true;}}simTick(1/30);}ctx.setTransform(DPR,0,0,DPR,0,0);render(1/30);const ow=1280,oh=Math.round(1280*VH/VW);if(!window.__ocv)window.__ocv=document.createElement('canvas');const o=window.__ocv;o.width=ow;o.height=oh;o.getContext('2d').drawImage(cv,0,0,ow,oh);return o.toDataURL('image/jpeg',0.82);},
   give:(k)=>{powerups.push({x:cenx,y:ceny-60,kind:k||'nova',ph:0,t:0});return 'gave '+(k||'nova');},
   bot:(secs)=>{
     if(S.mode!=='play')startPlay();

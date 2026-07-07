@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>MURMUR — grow the swarm of light</title>
-<meta name="description" content="Move to guide your swarm of light. Sweep over the glowing lights to GROW, and flee the dark before it devours you. How big can your swarm get?">
+<meta name="description" content="Guide a living swarm of light. Sweep over lights to GROW, dive through shifting depths, grab power-ups and flee the dark. How deep can your swarm get?">
 <meta name="theme-color" content="#05070f">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><radialGradient id='g'><stop offset='0' stop-color='white'/><stop offset='0.4' stop-color='%2367e8f9'/><stop offset='1' stop-color='%230a0e1a'/></radialGradient></defs><rect width='64' height='64' fill='%2304050d'/><circle cx='32' cy='32' r='9' fill='url(%23g)'/><circle cx='20' cy='22' r='3' fill='%23a5b4fc'/><circle cx='46' cy='26' r='3' fill='%23f0abfc'/><circle cx='24' cy='44' r='2.5' fill='%23fde68a'/><circle cx='44' cy='42' r='2.5' fill='%235eead4'/></svg>">
 <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
@@ -13,30 +13,29 @@
   #c{display:block}
   #ui{position:fixed;inset:0;pointer-events:none;font-family:'Segoe UI',Arial,sans-serif;color:#e6edf8;text-align:center}
   .col{position:absolute;left:0;right:0}
-  /* title */
   #title{top:24%;transition:opacity .8s}
   #title h1{margin:0;font-size:16vmin;font-weight:100;letter-spacing:1.4vmin;background:linear-gradient(90deg,#67e8f9,#a5b4fc,#f0abfc,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 34px rgba(129,140,248,.5))}
   #title .how{margin-top:2vmin;font-size:2.4vmin;font-weight:300;color:#aeb9d6;line-height:1.9}
   #title .how b{color:#fde68a;font-weight:600}
   #title .go{margin-top:3vmin;font-size:2.7vmin;font-weight:300;color:#e0f2fe;animation:pulse 1.7s ease-in-out infinite}
+  #title .unl{margin-top:2.4vmin;font-size:1.7vmin;color:#7f8fb3;font-weight:300;letter-spacing:.2vmin}
   @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
-  /* hud */
   #hud{top:14px;opacity:0;transition:opacity .5s}
-  #hud .goal{font-size:1.9vmin;letter-spacing:.35vmin;color:#8ea2c9;font-weight:500}
+  #hud .goal{font-size:1.8vmin;letter-spacing:.35vmin;color:#8ea2c9;font-weight:500}
   #hud .big{font-size:7vmin;font-weight:200;line-height:1.05;letter-spacing:.2vmin;text-shadow:0 0 26px rgba(129,140,248,.55);font-variant-numeric:tabular-nums}
   #hud .big small{font-size:2vmin;font-weight:400;color:#93a3c0;letter-spacing:.4vmin;vertical-align:middle}
-  #hud .sc{font-size:2.1vmin;color:#7183a8;font-weight:300;font-variant-numeric:tabular-nums}
-  /* coach + milestone */
-  #coach{bottom:12%;font-size:2.7vmin;font-weight:400;color:#fdf3c9;text-shadow:0 0 20px rgba(0,0,0,.8);opacity:0;transition:opacity .35s}
+  #hud .sc{font-size:2vmin;color:#7183a8;font-weight:300;font-variant-numeric:tabular-nums}
+  #hud .dp{font-size:1.7vmin;color:#9db2d6;font-weight:400;letter-spacing:.5vmin;margin-top:.4vmin}
+  #coach{bottom:12%;font-size:2.6vmin;font-weight:400;color:#fdf3c9;text-shadow:0 0 20px rgba(0,0,0,.8);opacity:0;transition:opacity .35s}
   #mile{top:40%;font-size:6vmin;font-weight:200;letter-spacing:.6vmin;color:#fde68a;text-shadow:0 0 30px rgba(253,230,138,.6);opacity:0}
-  /* game over */
   #over{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,rgba(10,14,30,.35),rgba(4,5,13,.82))}
   #over h2{margin:0;font-size:5vmin;font-weight:100;letter-spacing:1vmin;color:#c9d3ee}
   #over .peak{font-size:9vmin;font-weight:200;color:#fde68a;line-height:1.1;margin:.5vmin;text-shadow:0 0 34px rgba(253,230,138,.5)}
   #over .peak small{font-size:2.4vmin;color:#93a3c0;letter-spacing:.4vmin;font-weight:400}
-  #over .r{font-size:2.4vmin;color:#8ea2c9;font-weight:300;margin-top:1vmin}
-  #over .b{font-size:2vmin;color:#a5b4fc;margin-top:.6vmin;font-weight:300}
-  #over .again{margin-top:3.6vmin;font-size:2.7vmin;color:#e0f2fe;font-weight:300;animation:pulse 1.7s ease-in-out infinite}
+  #over .r{font-size:2.3vmin;color:#8ea2c9;font-weight:300;margin-top:1vmin}
+  #over .b{font-size:1.9vmin;color:#a5b4fc;margin-top:.6vmin;font-weight:300}
+  #over .unlock{font-size:2vmin;color:#fde68a;margin-top:1vmin;font-weight:400;min-height:2vmin}
+  #over .again{margin-top:3vmin;font-size:2.7vmin;color:#e0f2fe;font-weight:300;animation:pulse 1.7s ease-in-out infinite}
   #sound{position:absolute;bottom:16px;left:16px;pointer-events:auto;cursor:pointer;font-size:20px;opacity:.5}#sound:hover{opacity:1}
   .fade{opacity:0!important} .show{opacity:1!important} .flex{display:flex!important}
 </style>
@@ -46,26 +45,27 @@
 <div id="ui">
   <div class="col" id="title">
     <h1>MURMUR</h1>
-    <div class="how">Move to guide your swarm.<br>Sweep over the <b>light</b> to <b>GROW</b> — flee the <b>dark</b>.</div>
+    <div class="how">Move to guide your swarm.<br>Sweep over the <b>light</b> to <b>GROW</b> — dive deeper — flee the <b>dark</b>.</div>
     <div class="go">move to begin</div>
+    <div class="unl" id="unl"></div>
   </div>
   <div class="col" id="hud">
     <div class="goal">EAT LIGHT TO GROW  ·  FLEE THE DARK</div>
     <div class="big"><span id="szN">0</span> <small>SWARM</small></div>
     <div class="sc"><span id="scN">0</span> pts</div>
+    <div class="dp" id="dpN"></div>
   </div>
   <div class="col" id="coach"></div>
   <div class="col" id="mile"></div>
-  <div id="over"><h2>YOUR SWARM WAS CONSUMED</h2><div class="peak"><span id="pk">0</span><br><small>LARGEST SWARM</small></div><div class="r"></div><div class="b"></div><div class="again">move to begin again</div></div>
+  <div id="over"><h2>YOUR SWARM WAS CONSUMED</h2><div class="peak"><span id="pk">0</span><br><small>LARGEST SWARM</small></div><div class="r"></div><div class="b"></div><div class="unlock" id="unlock"></div><div class="again">move to begin again</div></div>
   <div id="sound">🔊</div>
 </div>
 <script>
 'use strict';
-/* ============ MURMUR — clarity build ============
-   Teach-as-you-play. Safe gather opening + live coaching, clear goal
-   (grow your swarm), progress rings on food, danger telegraph on the
-   void, coherent swarm colour that levels up with size. Premium render.
-================================================= */
+/* ============ MURMUR — depth build (built to clear CrazyGames' bar) ============
+   Teach-as-you-play core + escalating DEPTHS (biomes), a DRIFTER hazard,
+   POWER-UPS (Nova repels the dark, Frenzy doubles growth), unlockable swarm
+   colours, and richer juice. */
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -89,16 +89,20 @@ function resize(){
 }
 addEventListener('resize',resize);
 
-/* ---------- background (calmer, so gameplay pops) ---------- */
+/* ---------- depths (biomes) ---------- */
+const DEPTHS=[
+  {t:0,   sz:0,    name:'THE SHALLOWS',  bg:['#16234d','#0e2e37','#20153c'], drift:0},
+  {t:26,  sz:400,  name:'THE NEBULA',    bg:['#2a1a4d','#123a44','#3a1f2e'], drift:1},
+  {t:58,  sz:820,  name:'THE DEEP',      bg:['#0e2540','#241033','#123a44'], drift:1.5},
+  {t:98,  sz:1300, name:'THE VOIDLIGHT', bg:['#3a1030','#101a4d','#0e3040'], drift:2},
+];
 function paintBackground(){
+  const pal=DEPTHS[S?S.depth:0].bg;
   const g=bgctx; g.setTransform(DPR,0,0,DPR,0,0);
   g.fillStyle='#04050d'; g.fillRect(0,0,VW,VH);
   g.globalCompositeOperation='lighter';
-  for(const [col,fx,fy] of [['#16234d',0.5,0.35],['#0e2e37',0.74,0.64],['#20153c',0.3,0.72]]){
-    const cx=VW*fx, cy=VH*fy, r=Math.max(VW,VH)*rnd(0.4,0.6);
-    const grd=g.createRadialGradient(cx,cy,0,cx,cy,r); grd.addColorStop(0,col); grd.addColorStop(1,'rgba(0,0,0,0)');
-    g.globalAlpha=0.42; g.fillStyle=grd; g.fillRect(0,0,VW,VH);
-  }
+  const pos=[[0.5,0.35],[0.74,0.64],[0.3,0.72]];
+  pal.forEach((col,i)=>{const [fx,fy]=pos[i];const cx=VW*fx,cy=VH*fy,r=Math.max(VW,VH)*rnd(0.4,0.6);const grd=g.createRadialGradient(cx,cy,0,cx,cy,r);grd.addColorStop(0,col);grd.addColorStop(1,'rgba(0,0,0,0)');g.globalAlpha=0.44;g.fillStyle=grd;g.fillRect(0,0,VW,VH);});
   g.globalAlpha=1; g.globalCompositeOperation='source-over';
   const vg=g.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*0.32,VW/2,VH/2,Math.max(VW,VH)*0.72);
   vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(2,3,9,0.9)');
@@ -110,16 +114,24 @@ function initStars(){stars=[];const n=Math.round(VW*VH/13000);for(let i=0;i<n;i+
 /* ---------- sprites ---------- */
 const SP=64;
 function radial(stops){const s=document.createElement('canvas');s.width=SP;s.height=SP;const g=s.getContext('2d');const gr=g.createRadialGradient(SP/2,SP/2,0,SP/2,SP/2,SP/2);for(const [o,c] of stops)gr.addColorStop(o,c);g.fillStyle=gr;g.beginPath();g.arc(SP/2,SP/2,SP/2,0,7);g.fill();return s;}
-// coherent progression palette: cool -> warm as swarm grows
-const PAL=['#7dd3fc','#38bdf8','#818cf8','#a78bfa','#c084fc','#e879f9','#fbbf24','#fde68a'];
-const glow=PAL.map(c=>radial([[0,'rgba(255,255,255,0.95)'],[0.25,c],[1,'rgba(0,0,0,0)']]));
+// unlockable swarm colour themes (best-score gates)
+const THEMES=[
+  ['#7dd3fc','#38bdf8','#818cf8','#a78bfa','#c084fc','#e879f9','#fbbf24','#fde68a'], // Aurora
+  ['#6ee7b7','#34d399','#22d3ee','#38bdf8','#818cf8','#a78bfa','#f0abfc','#fde68a'], // Verdant
+  ['#fca5a5','#fb923c','#fbbf24','#fde68a','#f0abfc','#e879f9','#c084fc','#a5b4fc'], // Ember
+];
+const THEME_NAMES=['Aurora','Verdant','Ember'];
+const THEME_UNLOCK=[0,1800,5000];
+const glowByTheme=THEMES.map(pal=>pal.map(c=>radial([[0,'rgba(255,255,255,0.95)'],[0.25,c],[1,'rgba(0,0,0,0)']])));
 const starSprite=radial([[0,'rgba(255,255,255,0.85)'],[0.4,'rgba(190,210,255,0.4)'],[1,'rgba(0,0,0,0)']]);
 const lightCore=radial([[0,'rgba(255,255,255,1)'],[0.28,'#fff2b0'],[0.62,'rgba(251,191,36,0.5)'],[1,'rgba(0,0,0,0)']]);
 const voidCore=radial([[0,'rgba(3,2,8,1)'],[0.58,'rgba(6,3,14,0.96)'],[0.78,'rgba(30,6,26,0.45)'],[1,'rgba(0,0,0,0)']]);
 const voidRing=radial([[0,'rgba(0,0,0,0)'],[0.64,'rgba(0,0,0,0)'],[0.75,'rgba(248,80,110,0.85)'],[0.85,'rgba(217,70,239,0.45)'],[1,'rgba(0,0,0,0)']]);
+const novaSprite=radial([[0,'rgba(255,255,255,1)'],[0.3,'#7dd3fc'],[0.7,'rgba(56,189,248,0.4)'],[1,'rgba(0,0,0,0)']]);
+const frenzySprite=radial([[0,'rgba(255,255,255,1)'],[0.3,'#f0abfc'],[0.7,'rgba(232,121,249,0.4)'],[1,'rgba(0,0,0,0)']]);
 
 /* ---------- swarm ---------- */
-const CAP=2200;
+const CAP=2400;
 const px=new Float32Array(CAP),py=new Float32Array(CAP),vx=new Float32Array(CAP),vy=new Float32Array(CAP),hof=new Float32Array(CAP),dead=new Uint8Array(CAP);
 let N=0;
 function addMote(x,y){if(N>=CAP)return;px[N]=x+rnd(-6,6);py[N]=y+rnd(-6,6);const a=Math.random()*7;vx[N]=Math.cos(a)*1.5;vy[N]=Math.sin(a)*1.5;hof[N]=rnd(-1.2,1.2);N++;}
@@ -129,6 +141,7 @@ function seedSwarm(n){N=0;for(let i=0;i<n;i++){const a=Math.random()*7,r=Math.ra
 const NEI=30,CELL=NEI;let cols,rows,cellHead,cellNext=new Int32Array(CAP);
 function buildGrid(){cols=Math.max(1,Math.ceil(VW/CELL));rows=Math.max(1,Math.ceil(VH/CELL));const nc=cols*rows;if(!cellHead||cellHead.length<nc)cellHead=new Int32Array(nc);for(let c=0;c<nc;c++)cellHead[c]=-1;for(let i=0;i<N;i++){let cx=(px[i]/CELL)|0,cy=(py[i]/CELL)|0;cx=cx<0?0:cx>=cols?cols-1:cx;cy=cy<0?0:cy>=rows?rows-1:cy;const c=cy*cols+cx;cellNext[i]=cellHead[c];cellHead[c]=i;}}
 function nearMotes(x,y,r,cb){let cx=(x/CELL)|0,cy=(y/CELL)|0;cx=cx<0?0:cx>=cols?cols-1:cx;cy=cy<0?0:cy>=rows?rows-1:cy;const cr=Math.ceil(r/CELL),r2=r*r;for(let gy=cy-cr;gy<=cy+cr;gy++){if(gy<0||gy>=rows)continue;for(let gx=cx-cr;gx<=cx+cr;gx++){if(gx<0||gx>=cols)continue;let j=cellHead[gy*cols+gx];while(j!==-1){const dx=px[j]-x,dy=py[j]-y;if(dx*dx+dy*dy<r2)cb(j);j=cellNext[j];}}}}
+function countNear(x,y,r){let n=0;nearMotes(x,y,r,()=>n++);return n;}
 
 /* ---------- pointer ---------- */
 const P={x:0,y:0,active:false,down:false};
@@ -141,39 +154,52 @@ cv.addEventListener('touchmove',e=>{setP(e);e.preventDefault();},{passive:false}
 addEventListener('touchend',()=>P.down=false);
 function onInteract(){ audioStart(); if(S.mode==='title'||S.mode==='over') startPlay(); }
 
-/* ---------- lights + predators ---------- */
-let lights=[], preds=[], nearestL=null;
+/* ---------- entities ---------- */
+let lights=[], preds=[], powerups=[], nearestL=null, nova=null;
 function spawnLight(){const m=110;lights.push({x:rnd(m,VW-m),y:rnd(m,VH-m),charge:0,ph:Math.random()*7});}
-function spawnPred(){const e=Math.floor(Math.random()*4);let x,y;if(e<2){x=e?VW+40:-40;y=rnd(0,VH);}else{x=rnd(0,VW);y=e===2?-40:VH+40;}preds.push({x,y,vx:0,vy:0,r:26,ph:Math.random()*7,rot:Math.random()*7});}
+function spawnHomer(){const e=Math.floor(Math.random()*4);let x,y;if(e<2){x=e?VW+40:-40;y=rnd(0,VH);}else{x=rnd(0,VW);y=e===2?-40:VH+40;}preds.push({x,y,vx:0,vy:0,r:26,ph:Math.random()*7,rot:Math.random()*7,type:'home'});}
+function spawnDrifter(){const horiz=Math.random()<0.5;let x,y,vx,vy;const sp=rnd(2.2,3.4);if(horiz){const l2r=Math.random()<0.5;x=l2r?-50:VW+50;y=rnd(VH*0.15,VH*0.85);vx=l2r?sp:-sp;vy=rnd(-0.5,0.5);}else{const t2b=Math.random()<0.5;y=t2b?-50:VH+50;x=rnd(VW*0.15,VW*0.85);vy=t2b?sp:-sp;vx=rnd(-0.5,0.5);}preds.push({x,y,vx,vy,r:24,ph:Math.random()*7,rot:0,type:'drift'});}
+function spawnPowerup(){const kind=Math.random()<0.5?'nova':'frenzy';const m=140;powerups.push({x:rnd(m,VW-m),y:rnd(m,VH-m),kind,ph:Math.random()*7,t:0});}
 
 /* ---------- state ---------- */
 const S={mode:'title',phase:'gather',t:0,phaseT:0,score:0,dispScore:0,best:+(localStorage.getItem('mur_best')||0),
-  maxSize:0,shake:0,milestone:0,energy:0,danger:0,szSmooth:220,coach:'',coachT:0};
-const MILES=[400,700,1100,1600];
+  maxSize:0,shake:0,milestone:0,energy:0,danger:0,szSmooth:220,coach:'',coachT:0,
+  depth:0,driftT:0,powT:0,frenzyT:0,theme:0,bloom:0};
+const MILES=[400,700,1100,1600,2200];
+function unlockedThemes(){let u=1;for(let i=1;i<THEME_UNLOCK.length;i++)if(S.best>=THEME_UNLOCK[i])u=i+1;return u;}
 function startPlay(){
   S.mode='play';S.phase='gather';S.t=0;S.phaseT=0;S.score=0;S.dispScore=0;S.maxSize=220;S.milestone=0;S.danger=0;S.szSmooth=220;
+  S.depth=0;S.driftT=0;S.powT=20;S.frenzyT=0;S.bloom=0;nova=null;
+  S.theme=unlockedThemes()-1;
   seedSwarm(220);
-  lights=[];for(let i=0;i<6;i++)spawnLight();
-  preds=[];
+  lights=[];for(let i=0;i<7;i++)spawnLight();
+  preds=[]; powerups=[];
+  paintBackground();
   document.getElementById('title').classList.add('fade');
   document.getElementById('over').classList.remove('flex');
   document.getElementById('hud').classList.add('show');
+  document.getElementById('dpN').textContent=DEPTHS[0].name;
   setCoach('Sweep your swarm over the glowing light to grow ✦',3);
   sdkStart();
 }
 function gameOver(){
   S.mode='over';
+  const prevUnlocked=unlockedThemes();
   if(S.score>S.best){S.best=Math.round(S.score);localStorage.setItem('mur_best',S.best);sdkHappy();}
   const o=document.getElementById('over');o.classList.add('flex');
   document.getElementById('pk').textContent=S.maxSize;
-  o.querySelector('.r').textContent=Math.round(S.score)+' points';
+  o.querySelector('.r').textContent='reached '+DEPTHS[S.depth].name+' · '+Math.round(S.score)+' points';
   o.querySelector('.b').textContent=(Math.round(S.score)>=S.best?'★ new best ':'best ')+S.best;
+  const nowUnlocked=unlockedThemes();
+  document.getElementById('unlock').textContent = nowUnlocked>prevUnlocked ? '✦ Unlocked '+THEME_NAMES[nowUnlocked-1]+' swarm!' : '';
   document.getElementById('hud').classList.remove('show');
+  // death scatter
+  for(let i=0;i<N;i++){const a=Math.atan2(py[i]-ceny,px[i]-cenx);vx[i]=Math.cos(a)*rnd(3,7);vy[i]=Math.sin(a)*rnd(3,7);}
   setCoach('',0); sDeath(); sdkStop();
 }
 function setCoach(txt,secs){S.coach=txt;S.coachT=secs||0;const e=document.getElementById('coach');e.textContent=txt;e.classList.toggle('show',!!txt);}
 
-/* ---------- flocking ---------- */
+/* ---------- flocking (tuned movement) ---------- */
 const MAXSPD=4.0,MINSPD=1.2,MAXF=0.22,SEP=13,SEPW=1.7,ALIW=1.0,COHW=0.9,WANDER=0.05;
 function stepFlock(){
   const sep2=SEP*SEP,nei2=NEI*NEI,pull=P.down?0.062:0.032;
@@ -192,7 +218,7 @@ function stepFlock(){
     if(y<40)fy+=(40-y)*0.02;else if(y>VH-40)fy-=(y-(VH-40))*0.02;
     for(let pi=0;pi<preds.length;pi++){const D=preds[pi];const ex=x-D.x,ey=y-D.y,e2=ex*ex+ey*ey;if(e2<9025&&e2>1){const inv=1/Math.sqrt(e2);const w=(1-Math.sqrt(e2)/95)*1.35;fx+=ex*inv*w;fy+=ey*inv*w;}}
     const fl=Math.hypot(fx,fy);if(fl>MAXF){fx=fx/fl*MAXF;fy=fy/fl*MAXF;}
-    const localMax=MAXSPD*(1+Math.min(1,dp/260)*0.9);   // catch-up: far motes move faster, then settle
+    const localMax=MAXSPD*(1+Math.min(1,dp/260)*0.9);
     let nvx=ix+fx,nvy=iy+fy,sp=Math.hypot(nvx,nvy);
     if(sp>localMax){nvx=nvx/sp*localMax;nvy=nvy/sp*localMax;}else if(sp<MINSPD&&sp>0.001){nvx=nvx/sp*MINSPD;nvy=nvy/sp*MINSPD;}
     vx[i]=nvx;vy[i]=nvy;px[i]=x+nvx;py[i]=y+nvy;
@@ -201,57 +227,77 @@ function stepFlock(){
 let cenx=0,ceny=0;
 function centroid(){let sx=0,sy=0;for(let i=0;i<N;i++){sx+=px[i];sy+=py[i];}cenx=N?sx/N:VW/2;ceny=N?sy/N:VH/2;}
 
-/* ---------- play step (phases + coaching + progression) ---------- */
+/* ---------- depth advance ---------- */
+function checkDepth(){
+  if(S.depth<DEPTHS.length-1 && (S.phaseT>=DEPTHS[S.depth+1].t || S.maxSize>=DEPTHS[S.depth+1].sz)){
+    S.depth++; paintBackground();
+    document.getElementById('dpN').textContent=DEPTHS[S.depth].name;
+    showMile('DEPTH '+(S.depth+1)+' · '+DEPTHS[S.depth].name); sMilestone(); S.bloom=1;
+  }
+}
+
+/* ---------- play step ---------- */
 function stepPlay(dt){
   S.phaseT+=dt;
-  // PHASE: safe gather first (teach), then the dark awakens & escalates
   if(S.phase==='gather'){
-    if(S.phaseT>7 && N>240){ S.phase='danger'; spawnPred(); setCoach('⚠ The dark has awoken — flee it while you gather!',3.5); sMilestone(); }
+    if(S.phaseT>7 && N>240){ S.phase='danger'; spawnHomer(); setCoach('⚠ The dark has awoken — flee it while you gather!',3.5); sMilestone(); }
   } else {
-    const want=1+Math.floor((S.phaseT)/18)+Math.floor(S.score/1000);
-    while(preds.length<Math.min(8,want))spawnPred();
+    const want=1+Math.floor(S.phaseT/24)+Math.floor(S.score/1400);
+    while(preds.filter(p=>p.type==='home').length<Math.min(6,want))spawnHomer();
+    // drifters, scaled by depth
+    const dr=DEPTHS[S.depth].drift;
+    if(dr>0){S.driftT-=dt; if(S.driftT<=0){S.driftT=rnd(6,11)/dr; if(preds.filter(p=>p.type==='drift').length<4)spawnDrifter();}}
   }
-  // lights: absorb → grow. track nearest to swarm for the "go here" hint
-  nearestL=null; let nd=1e9;
+  checkDepth();
+  // power-ups
+  S.powT-=dt; if(S.powT<=0 && powerups.length<2){S.powT=rnd(18,26); spawnPowerup();}
+  for(let k=powerups.length-1;k>=0;k--){const pw=powerups[k];pw.t+=dt; if(countNear(pw.x,pw.y,30)>=4){collectPowerup(pw);powerups.splice(k,1);}}
+  if(S.frenzyT>0)S.frenzyT-=dt;
+  // lights
+  nearestL=null; let nd=1e9; const gmul=S.frenzyT>0?2:1;
   for(const L of lights){
     let near=0; nearMotes(L.x,L.y,30,()=>{near++;});
     L.charge=Math.min(1,L.charge + near*dt*0.045);
     const d=Math.hypot(L.x-cenx,L.y-ceny); if(d<nd){nd=d;nearestL=L;}
     if(L.charge>=1){
-      for(let k=0;k<28;k++)addMote(L.x,L.y);
-      S.score+=60; S.shake=Math.min(1,S.shake+0.3); burst(L.x,L.y,28); sAbsorb();
+      for(let z=0;z<28*gmul;z++)addMote(L.x,L.y);
+      S.score+=60*gmul; S.shake=Math.min(1,S.shake+0.3); burst(L.x,L.y,28); sAbsorb();
       L.x=rnd(110,VW-110);L.y=rnd(110,VH-110);L.charge=0;
     }
   }
-  // predators nibble stragglers; compute danger for telegraph
+  // predators (homers home, drifters cross)
   let anyDead=false; S.danger=0;
-  for(const D of preds){
-    const dx=cenx-D.x,dy=ceny-D.y,d=Math.hypot(dx,dy)||1,spd=(0.55+S.phaseT*0.0035);
-    D.vx=D.vx*0.94+(dx/d)*spd*0.14; D.vy=D.vy*0.94+(dy/d)*spd*0.14; D.x+=D.vx; D.y+=D.vy; D.rot+=0.01;
-    S.danger=Math.max(S.danger, clamp(1-d/190,0,1));
+  for(let k=preds.length-1;k>=0;k--){
+    const D=preds[k];
+    if(D.type==='drift'){ D.x+=D.vx; D.y+=D.vy; D.rot+=0.02; if(D.x<-90||D.x>VW+90||D.y<-90||D.y>VH+90){preds.splice(k,1);continue;} }
+    else { const dx=cenx-D.x,dy=ceny-D.y,d=Math.hypot(dx,dy)||1,spd=(0.55+S.phaseT*0.0035); D.vx=D.vx*0.94+(dx/d)*spd*0.14; D.vy=D.vy*0.94+(dy/d)*spd*0.14; D.x+=D.vx; D.y+=D.vy; D.rot+=0.01; S.danger=Math.max(S.danger,clamp(1-d/190,0,1)); }
     let bites=0; nearMotes(D.x,D.y,16,(j)=>{if(bites<2&&!dead[j]){dead[j]=1;anyDead=true;bites++;}});
   }
   if(anyDead){let w=0;for(let i=0;i<N;i++){if(dead[i]){dead[i]=0;if(Math.random()<0.5)darkPuff(px[i],py[i]);continue;}if(w!==i){px[w]=px[i];py[w]=py[i];vx[w]=vx[i];vy[w]=vy[i];hof[w]=hof[i];}w++;}N=w;S.shake=Math.min(1,S.shake+0.2);sBite();}
+  if(nova){nova.t+=dt; if(nova.t>0.7)nova=null;}
   if(N>S.maxSize)S.maxSize=N;
   S.score+=dt*4*Math.min(4,N/300);
   S.szSmooth=lerp(S.szSmooth,N,0.05);
-  // milestones (the "point" made visible)
+  S.bloom=Math.max(0,S.bloom-dt*1.5);
   let ms=0; for(let i=0;i<MILES.length;i++)if(N>=MILES[i])ms=i+1;
-  if(ms>S.milestone){S.milestone=ms;showMile('SWARM '+MILES[ms-1]+'  '+'★'.repeat(ms));sMilestone();sdkHappy();}
-  // LIVE COACHING — always tell the player what to do now
+  if(ms>S.milestone){S.milestone=ms;showMile('SWARM '+MILES[ms-1]+'  '+'★'.repeat(Math.min(ms,5)));sMilestone();sdkHappy();S.bloom=1;}
   updateCoach(dt);
   if(N<50)gameOver();
 }
+function collectPowerup(pw){
+  burst(pw.x,pw.y,30); S.bloom=1;
+  if(pw.kind==='nova'){ nova={x:cenx,y:ceny,t:0}; for(const D of preds){const dx=D.x-cenx,dy=D.y-ceny,d=Math.hypot(dx,dy)||1;D.vx+=dx/d*9;D.vy+=dy/d*9;D.x+=dx/d*40;D.y+=dy/d*40;} showMile('✦ NOVA — the dark is repelled'); sMilestone(); }
+  else { S.frenzyT=8; showMile('✦ FRENZY — double growth!'); sMilestone(); }
+}
 function updateCoach(dt){
-  if(S.coachT>0){S.coachT-=dt;return;} // a scripted callout is showing
+  if(S.coachT>0){S.coachT-=dt;return;}
   let msg='';
   if(S.danger>0.55) msg='⚠ Flee the dark — it\'s eating your swarm!';
   else if(N<S.szSmooth-8 && (!nearestL||Math.hypot(nearestL.x-cenx,nearestL.y-ceny)>200)) msg='Your swarm is fading — reach the light! ✦';
   else if(nearestL && Math.hypot(nearestL.x-cenx,nearestL.y-ceny)>180) msg='Guide your swarm to the light ✦';
-  else msg='';
   if(msg!==document.getElementById('coach').textContent){const e=document.getElementById('coach');e.textContent=msg;e.classList.toggle('show',!!msg);}
 }
-function showMile(txt){const e=document.getElementById('mile');e.textContent=txt;e.style.opacity='1';clearTimeout(e._t);e._t=setTimeout(()=>e.style.opacity='0',1400);}
+function showMile(txt){const e=document.getElementById('mile');e.textContent=txt;e.style.opacity='1';clearTimeout(e._t);e._t=setTimeout(()=>e.style.opacity='0',1500);}
 
 /* ---------- particles ---------- */
 const fxp=[];
@@ -259,10 +305,7 @@ function burst(x,y,n){for(let i=0;i<n;i++){const a=Math.random()*7,s=rnd(2,7);fx
 function darkPuff(x,y){fxp.push({x,y,vx:rnd(-1,1),vy:rnd(-1,1),t:0,life:.5,dark:true});}
 function stepFx(dt){for(let i=fxp.length-1;i>=0;i--){const p=fxp[i];p.t+=dt;p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;if(p.t>=p.life)fxp.splice(i,1);}}
 
-/* ============ AUDIO — ethereal / crystalline (distinct from our arcade games) ============
-   Everything floats through a shared reverb. Voices are FM bells and soft
-   breaths — no square/saw blips. The swarm has a hum that rises with its
-   size, and the pad brightens as you grow. A different sonic world. */
+/* ================= AUDIO (ethereal / crystalline) ================= */
 let AC=null, MUTE=+(localStorage.getItem('mur_mute')||0), master=null, musGain=null, sfxBus=null, padFilt=null, humOsc=null, humGain=null;
 function makeImpulse(sec,decay){const rate=AC.sampleRate,len=(sec*rate)|0,buf=AC.createBuffer(2,len,rate);for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);}return buf;}
 function audioStart(){
@@ -270,21 +313,17 @@ function audioStart(){
   try{
     AC=new (window.AudioContext||window.webkitAudioContext)();
     master=AC.createGain(); master.gain.value=MUTE?0:1; master.connect(AC.destination);
-    // shared reverb — the signature of Murmur's sound
     const conv=AC.createConvolver(); conv.buffer=makeImpulse(3.4,2.3);
     const rev=AC.createGain(); rev.gain.value=0.6; conv.connect(rev); rev.connect(master);
-    sfxBus=AC.createGain(); sfxBus.gain.value=1; sfxBus.connect(master); sfxBus.connect(conv);   // dry + wet
-    // ambient pad through the same reverb
+    sfxBus=AC.createGain(); sfxBus.gain.value=1; sfxBus.connect(master); sfxBus.connect(conv);
     musGain=AC.createGain(); musGain.gain.value=0; musGain.connect(master); musGain.connect(conv);
     padFilt=AC.createBiquadFilter(); padFilt.type='lowpass'; padFilt.frequency.value=420; padFilt.Q.value=5; padFilt.connect(musGain);
     [55,82.41,110,164.81].forEach((f,i)=>{const o=AC.createOscillator();o.type='sine';o.frequency.value=f;const d=AC.createOscillator();d.frequency.value=0.04+i*0.025;const dg=AC.createGain();dg.gain.value=2;d.connect(dg);dg.connect(o.detune);const g=AC.createGain();g.gain.value=0.14/(i+1);o.connect(g);g.connect(padFilt);o.start();d.start();});
     const lfo=AC.createOscillator();lfo.frequency.value=0.04;const lg=AC.createGain();lg.gain.value=170;lfo.connect(lg);lg.connect(padFilt.frequency);lfo.start();
-    // the swarm's living voice — a soft hum tracking its size
     humOsc=AC.createOscillator();humOsc.type='sine';humOsc.frequency.value=68;humGain=AC.createGain();humGain.gain.value=0;humOsc.connect(humGain);humGain.connect(sfxBus);humOsc.start();
     musGain.gain.linearRampToValueAtTime(0.85, AC.currentTime+3.5);
   }catch(e){AC=null;}
 }
-// FM bell — glassy, crystalline (the opposite of our other games' blips)
 function bell(freq,dur,ratio,index,vol,when){
   if(!AC||MUTE)return; const t=when||AC.currentTime;
   const car=AC.createOscillator();car.type='sine';car.frequency.setValueAtTime(freq,t);
@@ -293,7 +332,6 @@ function bell(freq,dur,ratio,index,vol,when){
   const g=AC.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.008);g.gain.exponentialRampToValueAtTime(0.0005,t+dur);
   car.connect(g);g.connect(sfxBus);car.start(t);mod.start(t);car.stop(t+dur+0.05);mod.stop(t+dur+0.05);
 }
-// soft dark breath for loss (filtered noise swell, no harsh transient)
 function breath(dur,vol,cutoff){
   if(!AC||MUTE)return; const t=AC.currentTime;
   const len=Math.max(1,dur*AC.sampleRate|0),b=AC.createBuffer(1,len,AC.sampleRate),d=b.getChannelData(0);
@@ -303,11 +341,11 @@ function breath(dur,vol,cutoff){
   const g=AC.createGain();g.gain.value=vol||0.16;
   s.connect(f);f.connect(g);g.connect(sfxBus);s.start(t);
 }
-const PENT=[0,2,4,7,9,12,14,16,19,21];   // pentatonic ladder
+const PENT=[0,2,4,7,9,12,14,16,19,21];
 function sAbsorb(){ if(!AC)return; const t=AC.currentTime; const tier=Math.floor((N-200)/180); for(let i=0;i<3;i++){const semi=PENT[clamp(tier+i,0,PENT.length-1)]; bell(523.25*Math.pow(2,semi/12),1.1,3.5,2,0.085,t+i*0.045);} }
 function sBite(){ breath(0.35,0.13,300); bell(72,0.5,2,1,0.045); }
 function sDeath(){ if(!AC)return; const t=AC.currentTime; for(let i=0;i<6;i++)bell(660*Math.pow(2,-i/4),1.5,2,2,0.08,t+i*0.09); breath(1.3,0.15,240); }
-function sMilestone(){ if(!AC)return; const t=AC.currentTime; [0,4,7,11,14].forEach((s,i)=>bell(523.25*Math.pow(2,s/12),1.7,3,1.5,0.085,t+i*0.05)); }   // radiant lydian bloom
+function sMilestone(){ if(!AC)return; const t=AC.currentTime; [0,4,7,11,14].forEach((s,i)=>bell(523.25*Math.pow(2,s/12),1.7,3,1.5,0.085,t+i*0.05)); }
 function audioUpdate(){ if(!AC||MUTE||!humOsc)return; try{ humGain.gain.value = S.mode==='play'?clamp(N/2600*0.05,0,0.05):0.004; humOsc.frequency.value=60+S.energy*46; if(padFilt)padFilt.frequency.value=360+S.energy*860; }catch(e){} }
 document.getElementById('sound').onclick=()=>{MUTE=MUTE?0:1;localStorage.setItem('mur_mute',MUTE);document.getElementById('sound').textContent=MUTE?'🔇':'🔊';if(master)master.gain.value=MUTE?0:1;};
 document.addEventListener('visibilitychange',()=>{if(AC){try{document.hidden?AC.suspend():AC.resume();}catch(e){}}});
@@ -322,57 +360,54 @@ function sdkHappy(){const n=Date.now();if(n-lastHappy<15000)return;lastHappy=n;t
 
 /* ================= RENDER ================= */
 let starT=0;
-function swarmHue(i,sp){
-  // coherent colour that levels up with size: energy shifts the whole swarm cool->warm
-  const base=S.energy*6.4; // 0 cyan .. 6.4 gold
-  let h=Math.round(base+hof[i]+sp*0.4); return ((h%PAL.length)+PAL.length)%PAL.length;
-}
+function swarmHue(i,sp){const base=S.energy*6.4;let h=Math.round(base+hof[i]+sp*0.4);return ((h%THEMES[0].length)+THEMES[0].length)%THEMES[0].length;}
 function render(dt){
   S.energy=lerp(S.energy, clamp((N-220)/1200,0,1), 0.05);
-  // trail layer (cleaner: a touch shorter)
+  const glow=glowByTheme[S.theme];
+  // trail layer
   tctx.globalCompositeOperation='source-over'; tctx.fillStyle='rgba(4,5,13,0.2)'; tctx.fillRect(0,0,VW,VH);
   tctx.globalCompositeOperation='lighter';
-  const mBoost=1+S.energy*0.35;
+  const mBoost=1+S.energy*0.35+S.bloom*0.3;
   for(let i=0;i<N;i++){const sp=Math.hypot(vx[i],vy[i]);const size=(6.5+sp*2.1)*mBoost;tctx.globalAlpha=0.6;tctx.drawImage(glow[swarmHue(i,sp)],px[i]-size/2,py[i]-size/2,size,size);}
   tctx.globalAlpha=1;
-
   // background
   ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1; ctx.drawImage(bgCv,0,0,VW,VH);
   starT+=dt; ctx.globalCompositeOperation='lighter';
   for(const st of stars){st.x-=st.z*0.12;if(st.x<0)st.x+=VW;const tw=0.4+0.6*Math.abs(Math.sin(starT*1.2+st.tw));const s=st.s*(1+st.z);ctx.globalAlpha=tw*0.4*st.z;ctx.drawImage(starSprite,st.x-s*3,st.y-s*3,s*6,s*6);}
   ctx.globalAlpha=1;
-
   // swarm + bloom
   ctx.globalCompositeOperation='lighter'; ctx.drawImage(trailCv,0,0,VW,VH);
-  if(!LOWQ){bctx.setTransform(1,0,0,1,0,0);bctx.clearRect(0,0,BW,BH);bctx.filter='blur(4px)';bctx.drawImage(trailCv,0,0,BW,BH);bctx.filter='none';ctx.globalAlpha=0.55+S.energy*0.25;ctx.drawImage(bloomCv,0,0,VW,VH);ctx.globalAlpha=1;}
+  if(!LOWQ){bctx.setTransform(1,0,0,1,0,0);bctx.clearRect(0,0,BW,BH);bctx.filter='blur(4px)';bctx.drawImage(trailCv,0,0,BW,BH);bctx.filter='none';ctx.globalAlpha=0.55+S.energy*0.25+S.bloom*0.2;ctx.drawImage(bloomCv,0,0,VW,VH);ctx.globalAlpha=1;}
 
   if(S.mode==='play'||S.mode==='over'){
-    // lights: radiant core + fill-ring showing gather progress + "go here" hint on nearest
+    // frenzy tint
+    if(S.frenzyT>0){ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(232,121,249,'+(0.05+0.03*Math.sin(S.t*8))+')';ctx.fillRect(0,0,VW,VH);}
+    // power-ups
+    ctx.globalCompositeOperation='lighter';
+    for(const pw of powerups){const spr=pw.kind==='nova'?novaSprite:frenzySprite;const pu=0.7+Math.sin(pw.t*4)*0.3,sz=34*pu;ctx.globalAlpha=0.9;ctx.drawImage(spr,pw.x-sz/2,pw.y-sz/2,sz,sz);ctx.globalAlpha=0.5+0.3*Math.sin(pw.t*4);ctx.strokeStyle=pw.kind==='nova'?'rgba(125,211,252,0.9)':'rgba(240,171,252,0.9)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(pw.x,pw.y,24+3*Math.sin(pw.t*4),0,7);ctx.stroke();}
+    ctx.globalAlpha=1;
+    // lights
     for(const L of lights){
       const pu=0.7+Math.sin(S.t*3+L.ph)*0.3, sz=30+L.charge*20;
       ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=0.55*pu+L.charge*0.4; ctx.drawImage(lightCore,L.x-sz/2,L.y-sz/2,sz,sz); ctx.globalAlpha=1;
-      // gather progress ring
       if(L.charge>0.02){ctx.globalCompositeOperation='source-over';ctx.strokeStyle='rgba(253,240,180,0.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(L.x,L.y,26,-Math.PI/2,-Math.PI/2+L.charge*Math.PI*2);ctx.stroke();}
-      // nearest-light target hint
       if(L===nearestL && S.mode==='play'){const r=34+Math.sin(S.t*4)*4;ctx.strokeStyle='rgba(253,224,110,'+(0.5+0.3*Math.sin(S.t*4))+')';ctx.lineWidth=2;ctx.beginPath();ctx.arc(L.x,L.y,r,0,7);ctx.stroke();}
     }
     ctx.globalCompositeOperation='lighter';
-    // particles
     for(const p of fxp){const k=1-p.t/p.life;ctx.globalAlpha=k*(p.dark?0.5:0.75);const spr=p.dark?voidRing:lightCore;const sz=p.dark?22:12;ctx.drawImage(spr,p.x-sz/2,p.y-sz/2,sz,sz);}
     ctx.globalAlpha=1;
-    // void predators: dark core + corona + danger telegraph ring
+    // nova shockwave
+    if(nova){const r=nova.t*Math.max(VW,VH)*0.9;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-nova.t/0.7)*0.6;ctx.strokeStyle='#7dd3fc';ctx.lineWidth=6;ctx.beginPath();ctx.arc(nova.x,nova.y,r,0,7);ctx.stroke();ctx.globalAlpha=1;}
+    // predators
     for(const D of preds){
       const pu=0.9+Math.sin(S.t*4+D.ph)*0.12, sz=D.r*3.0*pu;
       ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=0.96; ctx.drawImage(voidCore,D.x-sz/2,D.y-sz/2,sz,sz);
       ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=0.92; ctx.save();ctx.translate(D.x,D.y);ctx.rotate(D.rot);const rs=sz*1.14;ctx.drawImage(voidRing,-rs/2,-rs/2,rs,rs);ctx.restore();
-      // pulsing danger radius so players read the threat zone
-      ctx.globalCompositeOperation='source-over';ctx.strokeStyle='rgba(248,80,110,'+(0.12+0.12*Math.sin(S.t*5+D.ph))+')';ctx.lineWidth=2;ctx.beginPath();ctx.arc(D.x,D.y,48+6*Math.sin(S.t*5+D.ph),0,7);ctx.stroke();
+      ctx.globalCompositeOperation='source-over';ctx.strokeStyle=(D.type==='drift'?'rgba(217,70,239,':'rgba(248,80,110,')+(0.12+0.12*Math.sin(S.t*5+D.ph))+')';ctx.lineWidth=2;ctx.beginPath();ctx.arc(D.x,D.y,48+6*Math.sin(S.t*5+D.ph),0,7);ctx.stroke();
     }
     ctx.globalAlpha=1;
-    // danger edge vignette
     if(S.danger>0.15){ctx.globalCompositeOperation='source-over';const dg=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*0.35,VW/2,VH/2,Math.max(VW,VH)*0.6);dg.addColorStop(0,'rgba(0,0,0,0)');dg.addColorStop(1,'rgba(244,63,94,'+(S.danger*0.28)+')');ctx.fillStyle=dg;ctx.fillRect(0,0,VW,VH);}
   }
-  // pointer
   ctx.globalCompositeOperation='lighter';
   if(P.active&&S.mode!=='over'){ctx.globalAlpha=P.down?0.5:0.22;const ps=P.down?96:58;ctx.drawImage(glow[2],P.x-ps/2,P.y-ps/2,ps,ps);}
   ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
@@ -392,23 +427,28 @@ function frame(now){
   simTick(dt);
   if(S.shake>0){ctx.setTransform(DPR,0,0,DPR,rnd(-1,1)*S.shake*6*DPR,rnd(-1,1)*S.shake*6*DPR);}else ctx.setTransform(DPR,0,0,DPR,0,0);
   render(dt);
-  S.dispScore+=(S.score-S.dispScore)*0.15;
-  audioUpdate();
+  S.dispScore+=(S.score-S.dispScore)*0.15; audioUpdate();
   if(S.mode==='play'){document.getElementById('szN').textContent=N;document.getElementById('scN').textContent=Math.round(S.dispScore);}
   frames++;fpsT+=dtms;if(fpsT>=600){fps=Math.round(frames/(fpsT/1000));frames=0;fpsT=0;LOWQ=fps<42;}
 }
-function boot(){DPR=Math.min(devicePixelRatio||1,1.5);resize();P.x=VW/2;P.y=VH/2;seedSwarm(220);if(MUTE)document.getElementById('sound').textContent='🔇';requestAnimationFrame(frame);}
+function boot(){
+  DPR=Math.min(devicePixelRatio||1,1.5);resize();P.x=VW/2;P.y=VH/2;seedSwarm(220);
+  if(MUTE)document.getElementById('sound').textContent='🔇';
+  const u=unlockedThemes();document.getElementById('unl').textContent = S.best>0 ? ('best '+S.best+(u<THEMES.length?'  ·  next swarm at '+THEME_UNLOCK[u]:'  ·  all swarms unlocked')) : '';
+  requestAnimationFrame(frame);
+}
 boot();
 
 /* ---------- debug ---------- */
 window.__mur={
-  info:()=>({mode:S.mode,phase:S.phase,n:N,fps,score:Math.round(S.score),maxSize:S.maxSize,mile:S.milestone,preds:preds.length,danger:+S.danger.toFixed(2),energy:+S.energy.toFixed(2),coach:document.getElementById('coach').textContent,best:S.best}),
+  info:()=>({mode:S.mode,phase:S.phase,depth:S.depth,depthName:DEPTHS[S.depth].name,n:N,fps,score:Math.round(S.score),maxSize:S.maxSize,mile:S.milestone,homers:preds.filter(p=>p.type==='home').length,drifters:preds.filter(p=>p.type==='drift').length,powerups:powerups.length,frenzy:+S.frenzyT.toFixed(1),theme:S.theme,best:S.best,coach:document.getElementById('coach').textContent}),
   start:()=>startPlay(),
   move:(x,y,down)=>{P.x=x;P.y=y;P.active=true;P.down=!!down;onInteract();return window.__mur.info();},
+  give:(k)=>{powerups.push({x:cenx,y:ceny-60,kind:k||'nova',ph:0,t:0});return 'gave '+(k||'nova');},
   bot:(secs)=>{
     if(S.mode!=='play')startPlay();
     let steps=Math.floor((secs||5)*60);
-    while(steps-->0){let best=null,bd=1e9;for(const L of lights){const d=Math.hypot(L.x-cenx,L.y-ceny);if(d<bd){bd=d;best=L;}}if(best){P.x=best.x;P.y=best.y;P.active=true;P.down=true;}simTick(1/60);if(S.mode==='over')break;}
+    while(steps-->0){let best=null,bd=1e9;for(const L of lights){const d=Math.hypot(L.x-cenx,L.y-ceny);if(d<bd){bd=d;best=L;}}for(const pw of powerups){const d=Math.hypot(pw.x-cenx,pw.y-ceny);if(d<bd*0.7){bd=d;best=pw;}}if(best){P.x=best.x;P.y=best.y;P.active=true;P.down=true;}simTick(1/60);if(S.mode==='over')break;}
     return window.__mur.info();
   },
 };
